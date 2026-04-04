@@ -1,6 +1,8 @@
 import logging
+import os
 import re
-from config import HEADERS
+from datetime import datetime
+from config import HEADERS, OUTPUT_CONFIG
 
 
 def parse_cookie(cookie_str: str) -> dict:
@@ -106,10 +108,25 @@ def setup_logger(name: str = "crawler") -> logging.Logger:
     if logger.handlers:
         return logger
     
+    # 控制台 handler
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
     console_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     console_handler.setFormatter(console_format)
     logger.addHandler(console_handler)
+    
+    # 文件 handler
+    logs_dir = OUTPUT_CONFIG["LOGS_DIR"]
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)
+    
+    date_str = datetime.now().strftime("%Y%m%d")
+    log_file = os.path.join(logs_dir, f"{name}_{date_str}.log")
+    
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setLevel(logging.DEBUG)
+    file_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    file_handler.setFormatter(file_format)
+    logger.addHandler(file_handler)
     
     return logger
