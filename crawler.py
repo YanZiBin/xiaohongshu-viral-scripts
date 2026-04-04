@@ -46,9 +46,20 @@ class XiaohongshuCrawler:
                 # 启动浏览器
                 browser = p.chromium.launch(headless=True)
                 context = browser.new_context(
-                    user_agent=self.headers["User-Agent"],
-                    cookie=[{"name": k, "value": v, "domain": ".xiaohongshu.com", "path": "/"} for k, v in self.cookie.items()]
+                    user_agent=self.headers["User-Agent"]
                 )
+                page = context.new_page()
+                
+                # 设置 Cookie
+                context.add_cookies([{
+                    "name": k,
+                    "value": v,
+                    "domain": ".xiaohongshu.com",
+                    "path": "/",
+                    "httpOnly": True,
+                    "secure": True
+                } for k, v in self.cookie.items()])
+                
                 page = context.new_page()
                 
                 # 访问搜索页面
