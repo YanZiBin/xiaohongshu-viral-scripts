@@ -73,7 +73,13 @@ class XiaohongshuCrawler:
                 page.goto(url, timeout=60000)
                 
                 # 等待页面加载完成
-                page.wait_for_timeout(8000)
+                page.wait_for_timeout(5000)
+                
+                # 滚动页面加载更多内容
+                logger.info("滚动页面加载数据...")
+                for i in range(3):
+                    page.evaluate("window.scrollBy(0, window.innerHeight)")
+                    page.wait_for_timeout(2000)
                 
                 # 尝试多种方法提取数据
                 note_data = []
@@ -112,7 +118,7 @@ class XiaohongshuCrawler:
                             // 尝试从 feed 提取
                             if (state.feed && state.feed.feeds) {
                                 const feeds = state.feed.feeds._rawValue || state.feed.feeds._value;
-                                if (Array.isArray(feeds)) {
+                                if (Array.isArray(feeds) && feeds.length > 0) {
                                     return feeds.map(item => ({
                                         id: item.id,
                                         modelType: item.model_type || item.modelType
@@ -132,7 +138,7 @@ class XiaohongshuCrawler:
                         }
                     """)
                 
-                logger.info(f"提取到的数据：{len(note_data)} 条")
+                logger.info(f"从 JS 提取到的数据：{len(note_data)} 条")
                 
                 # 方法 2：如果 __INITIAL_STATE__ 没有数据，从 DOM 提取笔记链接
                 if not note_data:
