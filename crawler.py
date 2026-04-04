@@ -100,47 +100,26 @@ class XiaohongshuCrawler:
                 logger.info("从 DOM 提取笔记数据...")
                 note_data = page.evaluate("""
                     () => {
-                        // 查找所有可能的笔记容器
-                        const selectors = [
-                            '[class*="note-card"]',
-                            '[class*="note-item"]',
-                            '[class*="feed-item"]',
-                            '[class*="note"]',
-                            'a[href*="/discovery/item/"]'
-                        ];
-                        
                         const notes = [];
                         const seenIds = new Set();
                         
-                        selectors.forEach(selector => {
-                            const elements = document.querySelectorAll(selector);
-                            console.log(`Selector ${selector} found ${elements.length} elements`);
-                            
-                            elements.forEach((el, index) => {
-                                // 如果是链接，直接提取 ID
-                                if (el.tagName === 'A') {
-                                    const href = el.href;
-                                    const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
-                                    if (idMatch && !seenIds.has(idMatch[1])) {
-                                        seenIds.add(idMatch[1]);
-                                        notes.push({ id: idMatch[1] });
-                                    }
-                                } else {
-                                    // 否则查找内部的链接
-                                    const link = el.querySelector('a[href*="/discovery/item/"]');
-                                    if (link) {
-                                        const href = link.href;
-                                        const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
-                                        if (idMatch && !seenIds.has(idMatch[1])) {
-                                            seenIds.add(idMatch[1]);
-                                            notes.push({ id: idMatch[1] });
-                                        }
-                                    }
+                        // 查找所有包含笔记链接的元素
+                        const allLinks = document.querySelectorAll('a');
+                        console.log('总链接数:', allLinks.length);
+                        
+                        allLinks.forEach((link) => {
+                            const href = link.href || '';
+                            if (href.includes('/discovery/item/')) {
+                                const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
+                                if (idMatch && !seenIds.has(idMatch[1])) {
+                                    seenIds.add(idMatch[1]);
+                                    notes.push({ id: idMatch[1], href: href });
                                 }
-                            });
+                            }
                         });
                         
-                        console.log('总共提取到的笔记 ID 数量:', notes.length);
+                        console.log('提取到的笔记 ID 数量:', notes.length);
+                        console.log('前 5 个 ID:', notes.slice(0, 5));
                         return notes;
                     }
                 """)
