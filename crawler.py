@@ -43,13 +43,14 @@ class XiaohongshuCrawler:
 
         try:
             with sync_playwright() as p:
-                # 启动浏览器（有头模式，便于调试）
+                # 启动浏览器（有头模式，可以看到浏览器窗口）
                 browser = p.chromium.launch(
-                    headless=True,
+                    headless=False,  # 显示浏览器窗口
                     args=[
                         '--disable-blink-features=AutomationControlled',
                         '--no-sandbox',
                         '--disable-dev-shm-usage',
+                        '--start-maximized',  # 最大化窗口
                     ]
                 )
                 context = browser.new_context(
@@ -75,34 +76,71 @@ class XiaohongshuCrawler:
                 # 等待页面初始加载
                 page.wait_for_timeout(5000)
                 
+                # 保存截图以便调试
+                page.screenshot(path="debug_search_page.png")
+                logger.info("已保存页面截图到 debug_search_page.png")
+                
                 # 滚动页面加载更多内容
                 logger.info("滚动页面加载数据...")
                 for i in range(5):
                     page.evaluate("window.scrollBy(0, 500)")
                     page.wait_for_timeout(1500)
                 
+                # 保存滚动后的截图
+                page.screenshot(path="debug_scrolled_page.png")
+                logger.info("已保存滚动后截图到 debug_scrolled_page.png")
+                
+                # 保存页面 HTML 以便分析
+                html = page.content()
+                with open("debug_page_source.html", "w", encoding="utf-8") as f:
+                    f.write(html)
+                logger.info("已保存页面 HTML 到 debug_page_source.html")
+                
                 # 从 DOM 提取笔记卡片信息
                 logger.info("从 DOM 提取笔记数据...")
                 note_data = page.evaluate("""
                     () => {
-                        // 查找所有笔记卡片
-                        const cards = document.querySelectorAll('[class*="note-card"], [class*="note-item"], [class*="feed-item"]');
-                        console.log('找到卡片数量:', cards.length);
+                        // 查找所有可能的笔记容器
+                        const selectors = [
+                            '[class*="note-card"]',
+                            '[class*="note-item"]',
+                            '[class*="feed-item"]',
+                            '[class*="note"]',
+                            'a[href*="/discovery/item/"]'
+                        ];
                         
                         const notes = [];
-                        cards.forEach((card, index) => {
-                            // 提取笔记 ID
-                            const link = card.querySelector('a[href*="/discovery/item/"]');
-                            const href = link ? link.href : '';
-                            const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
-                            const id = idMatch ? idMatch[1] : null;
+                        const seenIds = new Set();
+                        
+                        selectors.forEach(selector => {
+                            const elements = document.querySelectorAll(selector);
+                            console.log(`Selector ${selector} found ${elements.length} elements`);
                             
-                            if (id) {
-                                notes.push({ id });
-                            }
+                            elements.forEach((el, index) => {
+                                // 如果是链接，直接提取 ID
+                                if (el.tagName === 'A') {
+                                    const href = el.href;
+                                    const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
+                                    if (idMatch && !seenIds.has(idMatch[1])) {
+                                        seenIds.add(idMatch[1]);
+                                        notes.push({ id: idMatch[1] });
+                                    }
+                                } else {
+                                    // 否则查找内部的链接
+                                    const link = el.querySelector('a[href*="/discovery/item/"]');
+                                    if (link) {
+                                        const href = link.href;
+                                        const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
+                                        if (idMatch && !seenIds.has(idMatch[1])) {
+                                            seenIds.add(idMatch[1]);
+                                            notes.push({ id: idMatch[1] });
+                                        }
+                                    }
+                                }
+                            });
                         });
                         
-                        console.log('提取到的笔记 ID 数量:', notes.length);
+                        console.log('总共提取到的笔记 ID 数量:', notes.length);
                         return notes;
                     }
                 """)
