@@ -54,16 +54,17 @@ class XiaohongshuCrawler:
             html = response.text
 
             # 尝试从页面提取笔记 ID
-            # 小红书页面数据通常在 <script> 标签的 JSON 中
             note_ids = self._extract_note_ids_from_html(html)
             
             if note_ids:
-                return note_ids
+                # 限制数量
+                return note_ids[:limit]
 
             # 备用方案：从 HTML 中提取笔记链接
             note_links = re.findall(r'/discovery/item/([a-zA-Z0-9]+)', html)
             if note_links:
-                return list(dict.fromkeys(note_links))
+                logger.info(f"从 HTML 链接提取到 {len(note_links)} 篇笔记")
+                return list(dict.fromkeys(note_links))[:limit]
 
             logger.warning("未能从页面提取到笔记 ID")
             return []
@@ -85,24 +86,25 @@ class XiaohongshuCrawler:
         try:
             # 查找包含笔记数据的 JSON
             # 模式 1：<script>window.__INITIAL_STATE__={...}</script>
-            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})\s*</script>'
+            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})\s*;</script>'
             match = re.search(pattern, html, re.DOTALL)
 
             if match:
                 json_str = match.group(1)
                 data = self._safe_parse_json(json_str)
                 if data:
-                    return self._extract_note_ids_from_state(data)
+                    note_ids = self._extract_note_ids_from_state(data)
+                    if note_ids:
+                        logger.info(f"从 INITIAL_STATE 提取到 {len(note_ids)} 篇笔记")
+                        return note_ids
 
-            # 模式 2：尝试其他可能的 JSON 数据格式
-            # 查找所有 script 标签中的 JSON 数据
-            script_pattern = r'<script[^>]*>\s*window\.__INITIAL_STATE__\s*=\s*({.+?})\s;</script>'
-            matches = re.findall(script_pattern, html, re.DOTALL)
-            
-            for json_str in matches:
-                data = self._safe_parse_json(json_str)
-                if data:
-                    return self._extract_note_ids_from_state(data)
+            # 模式 2：尝试查找 feed 数据
+            # 小红书可能使用其他方式注入数据
+            feed_pattern = r'"feeds"\s*:\s*\[\s*\{[^}]*"id"\s*:\s*"([^"]+)"'
+            matches = re.findall(feed_pattern, html)
+            if matches:
+                logger.info(f"从 HTML 提取到 {len(matches)} 篇笔记 ID")
+                return list(dict.fromkeys(matches))
 
             return []
 
@@ -165,6 +167,36 @@ class XiaohongshuCrawler:
         
         return None
 
+    def _extract_notes_from_feeds(self, data: dict) -> list:
+        """
+        从 feed 数据中提取笔记信息
+        
+        Args:
+            data: 页面状态数据
+        
+        Returns:
+            笔记 ID 列表
+        """
+        note_ids = []
+        
+        try:
+            # 尝试从 feed 中提取
+            if "feed" in data:
+                feed_data = data["feed"]
+                feeds = feed_data.get("feeds", [])
+                
+                # 处理可能的 _rawValue 或 _value
+                if isinstance(feeds, dict):
+                    feeds = feeds.get("_rawValue") or feeds.get("_value") or []
+                
+                for item in feeds:
+                    if isinstance(item, dict) and "id" in item:
+                        note_ids.append(item["id"])
+        except Exception as e:
+            logger.warning(f"从 feed 提取笔记 ID 失败：{e}")
+        
+        return note_ids
+
     def _extract_note_ids_from_state(self, data: dict) -> list:
         """
         从 INITIAL_STATE 中提取笔记 ID
@@ -177,17 +209,26 @@ class XiaohongshuCrawler:
         """
         note_ids = []
 
-        # 需要根据实际数据结构调整
-        # 常见路径：searchResult -> notes 或 explore -> items
+        # 首先尝试从 feed 提取（搜索结果页的主要数据结构）
+        note_ids = self._extract_notes_from_feeds(data)
+        if note_ids:
+            return note_ids
+
+        # 备用方案：searchResult -> notes
         try:
             if "searchResult" in data:
                 notes = data["searchResult"].get("notes", [])
                 note_ids = [note.get("id", "") for note in notes if note.get("id")]
-            elif "explore" in data:
+        except Exception as e:
+            logger.warning(f"解析 searchResult 失败：{e}")
+
+        # 再备用：explore -> items
+        try:
+            if "explore" in data:
                 notes = data["explore"].get("items", [])
                 note_ids = [note.get("id", "") for note in notes if note.get("id")]
         except Exception as e:
-            logger.warning(f"解析 INITIAL_STATE 失败：{e}")
+            logger.warning(f"解析 explore 失败：{e}")
 
         return note_ids
 
@@ -246,7 +287,7 @@ class XiaohongshuCrawler:
         """
         try:
             # 查找页面数据
-            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})\s*</script>'
+            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})\s*;</script>'
             match = re.search(pattern, html, re.DOTALL)
 
             if not match:
@@ -260,40 +301,49 @@ class XiaohongshuCrawler:
                 logger.warning(f"无法解析 JSON 数据：{note_id}")
                 return None
 
-            # 提取笔记数据
+            # 提取笔记数据 - 尝试多个可能的路径
             note_data = None
-            if "note" in data:
-                note_data = data["note"]
-            elif "noteDetail" in data:
-                note_data = data["noteDetail"]
+            for key in ["note", "noteDetail", "noteDetailTab"]:
+                if key in data:
+                    note_data = data[key]
+                    break
 
             if not note_data:
+                logger.warning(f"未找到笔记数据：{note_id}")
                 return None
 
-            # 提取字段
+            # 提取字段 - 根据实际数据结构
+            # 可能是 note.note 或 noteDetail.note
             note_info = note_data.get("note", {}) if isinstance(note_data, dict) else note_data
-
+            
             # 作者信息
             user_info = note_data.get("user", {})
+            if not user_info and isinstance(note_info, dict):
+                user_info = note_info.get("user", {})
+            
             author = user_info.get("nickname", "") if isinstance(user_info, dict) else ""
+            if not author:
+                author = user_info.get("nickName", "")
 
             # 标题和正文
-            title = note_info.get("title", "")
-            content = note_info.get("desc", "")
+            title = note_info.get("title", "") if isinstance(note_info, dict) else ""
+            content = note_info.get("desc", "") if isinstance(note_info, dict) else ""
 
             # 互动数据
-            interactions = note_info.get("interactInfo", {})
+            interactions = note_info.get("interactInfo", {}) if isinstance(note_info, dict) else {}
             like_count = interactions.get("likedCount", 0)
             collect_count = interactions.get("collectedCount", 0)
             comment_count = interactions.get("commentCount", 0)
 
             # 封面
-            images = note_info.get("imageList", [])
-            cover_url = images[0].get("url", "") if images else ""
-
+            images = note_info.get("imageList", []) if isinstance(note_info, dict) else []
+            cover_url = ""
+            if images and isinstance(images, list) and len(images) > 0:
+                cover_url = images[0].get("url", "") if isinstance(images[0], dict) else ""
+            
             # 如果没有图片，检查是否是视频
             if not cover_url:
-                video_info = note_info.get("video", {})
+                video_info = note_info.get("video", {}) if isinstance(note_info, dict) else {}
                 cover_url = video_info.get("coverUrl", "") if isinstance(video_info, dict) else ""
 
             # 发布时间
@@ -304,9 +354,9 @@ class XiaohongshuCrawler:
                 "序号": 0,  # 由调用方设置
                 "作者": clean_text(author),
                 "标题": clean_text(title),
-                "点赞数": int(like_count) if like_count else 0,
-                "收藏数": int(collect_count) if collect_count else 0,
-                "评论数": int(comment_count) if comment_count else 0,
+                "点赞数": format_number(str(like_count)) if like_count else 0,
+                "收藏数": format_number(str(collect_count)) if collect_count else 0,
+                "评论数": format_number(str(comment_count)) if comment_count else 0,
                 "封面 URL": cover_url,
                 "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}",
                 "正文内容": clean_text(content),
