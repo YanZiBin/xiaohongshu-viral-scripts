@@ -84,13 +84,38 @@ class XiaohongshuCrawler:
             笔记 ID 列表
         """
         try:
-            # 查找包含笔记数据的 JSON
-            # 模式 1：<script>window.__INITIAL_STATE__={...}</script>
+            # 调试：保存 HTML 到文件以便分析
+            with open("debug_page.html", "w", encoding="utf-8") as f:
+                f.write(html[:100000])  # 只保存前 100KB
+            logger.info("已保存页面 HTML 到 debug_page.html")
+            
+            note_ids = []
+            
+            # 方法 1：从 URL 中提取笔记 ID
+            # 模式：/discovery/item/69cb9e60000000001f001c90
+            pattern = r'/discovery/item/([a-zA-Z0-9]{24,})'
+            matches = re.findall(pattern, html)
+            if matches:
+                note_ids = list(dict.fromkeys(matches))
+                logger.info(f"从 URL 提取到 {len(note_ids)} 篇笔记")
+                return note_ids[:30]
+            
+            # 方法 2：从 JSON 数据中提取
+            # 查找 "noteId":"xxx" 或 "note_id":"xxx"
+            json_pattern = r'"(?:noteId|note_id)"\s*:\s*"([a-zA-Z0-9]+)"'
+            matches = re.findall(json_pattern, html)
+            if matches:
+                note_ids = list(dict.fromkeys(matches))
+                logger.info(f"从 JSON 提取到 {len(note_ids)} 篇笔记")
+                return note_ids[:30]
+            
+            # 方法 3：从 INITIAL_STATE 提取（如果存在）
             pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})\s*;</script>'
             match = re.search(pattern, html, re.DOTALL)
 
             if match:
                 json_str = match.group(1)
+                logger.info(f"找到 INITIAL_STATE，长度：{len(json_str)}")
                 data = self._safe_parse_json(json_str)
                 if data:
                     note_ids = self._extract_note_ids_from_state(data)
@@ -98,18 +123,13 @@ class XiaohongshuCrawler:
                         logger.info(f"从 INITIAL_STATE 提取到 {len(note_ids)} 篇笔记")
                         return note_ids
 
-            # 模式 2：尝试查找 feed 数据
-            # 小红书可能使用其他方式注入数据
-            feed_pattern = r'"feeds"\s*:\s*\[\s*\{[^}]*"id"\s*:\s*"([^"]+)"'
-            matches = re.findall(feed_pattern, html)
-            if matches:
-                logger.info(f"从 HTML 提取到 {len(matches)} 篇笔记 ID")
-                return list(dict.fromkeys(matches))
-
+            logger.warning("未找到任何笔记 ID")
             return []
 
         except Exception as e:
             logger.warning(f"提取笔记 ID 失败：{e}")
+            import traceback
+            logger.warning(traceback.format_exc())
             return []
 
     def _safe_parse_json(self, json_str: str) -> Optional[dict]:
