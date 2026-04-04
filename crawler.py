@@ -1,6 +1,8 @@
 # crawler.py
 
 import time
+import json
+import re
 import requests
 from typing import Optional
 from config import CRAWLER_CONFIG, CSV_FIELDS
@@ -49,30 +51,119 @@ class XiaohongshuCrawler:
             response = self.session.get(url, params=params, timeout=30)
             response.raise_for_status()
 
-            # 尝试从页面提取笔记 ID
-            # 小红书页面数据通常在 <script> 标签的 JSON 中
-            import re
             html = response.text
 
-            # 查找包含笔记数据的 JSON
-            # 常见模式：<script>window.__INITIAL_STATE__={...}</script>
-            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})</script>'
-            match = re.search(pattern, html, re.DOTALL)
-
-            if match:
-                import json
-                data = json.loads(match.group(1))
-                # 根据实际数据结构提取笔记 ID
-                note_ids = self._extract_note_ids_from_state(data)
+            # 尝试从页面提取笔记 ID
+            # 小红书页面数据通常在 <script> 标签的 JSON 中
+            note_ids = self._extract_note_ids_from_html(html)
+            
+            if note_ids:
                 return note_ids
 
             # 备用方案：从 HTML 中提取笔记链接
             note_links = re.findall(r'/discovery/item/([a-zA-Z0-9]+)', html)
-            return list(dict.fromkeys(note_links))  # 去重保持顺序
+            if note_links:
+                return list(dict.fromkeys(note_links))
+
+            logger.warning("未能从页面提取到笔记 ID")
+            return []
 
         except Exception as e:
             logger.error(f"搜索失败：{e}")
             return []
+
+    def _extract_note_ids_from_html(self, html: str) -> list:
+        """
+        从 HTML 中提取笔记 ID
+        
+        Args:
+            html: 页面 HTML
+        
+        Returns:
+            笔记 ID 列表
+        """
+        try:
+            # 查找包含笔记数据的 JSON
+            # 模式 1：<script>window.__INITIAL_STATE__={...}</script>
+            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})\s*</script>'
+            match = re.search(pattern, html, re.DOTALL)
+
+            if match:
+                json_str = match.group(1)
+                data = self._safe_parse_json(json_str)
+                if data:
+                    return self._extract_note_ids_from_state(data)
+
+            # 模式 2：尝试其他可能的 JSON 数据格式
+            # 查找所有 script 标签中的 JSON 数据
+            script_pattern = r'<script[^>]*>\s*window\.__INITIAL_STATE__\s*=\s*({.+?})\s;</script>'
+            matches = re.findall(script_pattern, html, re.DOTALL)
+            
+            for json_str in matches:
+                data = self._safe_parse_json(json_str)
+                if data:
+                    return self._extract_note_ids_from_state(data)
+
+            return []
+
+        except Exception as e:
+            logger.warning(f"提取笔记 ID 失败：{e}")
+            return []
+
+    def _safe_parse_json(self, json_str: str) -> Optional[dict]:
+        """
+        安全地解析 JSON 字符串，处理可能的格式问题
+        
+        Args:
+            json_str: JSON 字符串
+        
+        Returns:
+            解析后的字典，失败返回 None
+        """
+        try:
+            # 首先尝试直接解析
+            return json.loads(json_str)
+        except json.JSONDecodeError as e:
+            logger.warning(f"JSON 直接解析失败：{e}")
+            # 尝试找到 JSON 的实际结束位置
+            # 小红书的数据可能包含 </script> 之前的多余内容
+            try:
+                # 计算大括号匹配
+                brace_count = 0
+                end_pos = 0
+                in_string = False
+                escape_next = False
+                
+                for i, char in enumerate(json_str):
+                    if escape_next:
+                        escape_next = False
+                        continue
+                    
+                    if char == '\\':
+                        escape_next = True
+                        continue
+                    
+                    if char == '"' and not escape_next:
+                        in_string = not in_string
+                        continue
+                    
+                    if not in_string:
+                        if char == '{':
+                            brace_count += 1
+                        elif char == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                end_pos = i + 1
+                                break
+                
+                if end_pos > 0:
+                    fixed_json = json_str[:end_pos]
+                    return json.loads(fixed_json)
+            except Exception as e:
+                logger.warning(f"JSON 修复失败：{e}")
+                return None
+        
+        return None
 
     def _extract_note_ids_from_state(self, data: dict) -> list:
         """
@@ -153,18 +244,21 @@ class XiaohongshuCrawler:
         Returns:
             笔记详情字典
         """
-        import re
-        import json
-
         try:
             # 查找页面数据
-            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})</script>'
+            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})\s*</script>'
             match = re.search(pattern, html, re.DOTALL)
 
             if not match:
+                logger.warning(f"未找到 __INITIAL_STATE__ 数据：{note_id}")
                 return None
 
-            data = json.loads(match.group(1))
+            json_str = match.group(1)
+            data = self._safe_parse_json(json_str)
+            
+            if not data:
+                logger.warning(f"无法解析 JSON 数据：{note_id}")
+                return None
 
             # 提取笔记数据
             note_data = None
