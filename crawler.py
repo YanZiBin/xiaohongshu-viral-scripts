@@ -5,8 +5,9 @@ import json
 import re
 import requests
 from typing import Optional
+from playwright.sync_api import sync_playwright
 from config import CRAWLER_CONFIG, CSV_FIELDS
-from utils import build_headers, clean_text, setup_logger
+from utils import build_headers, clean_text, setup_logger, format_number
 
 logger = setup_logger("crawler")
 
@@ -25,10 +26,11 @@ class XiaohongshuCrawler:
         self.headers = build_headers(cookie)
         self.session = requests.Session()
         self.session.headers.update(self.headers)
+        self.cookie_str = "; ".join([f"{k}={v}" for k, v in cookie.items()])
 
     def search_notes(self, keyword: str, limit: int = 30) -> list:
         """
-        搜索笔记
+        搜索笔记（使用 Playwright 获取动态加载的数据）
 
         Args:
             keyword: 搜索关键词
@@ -39,38 +41,62 @@ class XiaohongshuCrawler:
         """
         logger.info(f"开始搜索关键词：{keyword}")
 
-        # 构造搜索 URL
-        params = {
-            "keyword": keyword,
-            "source": "web_explore_feed",
-        }
-
-        url = f"{CRAWLER_CONFIG['BASE_URL']}/search_result"
-
         try:
-            response = self.session.get(url, params=params, timeout=30)
-            response.raise_for_status()
-
-            html = response.text
-
-            # 尝试从页面提取笔记 ID
-            note_ids = self._extract_note_ids_from_html(html)
-            
-            if note_ids:
-                # 限制数量
-                return note_ids[:limit]
-
-            # 备用方案：从 HTML 中提取笔记链接
-            note_links = re.findall(r'/discovery/item/([a-zA-Z0-9]+)', html)
-            if note_links:
-                logger.info(f"从 HTML 链接提取到 {len(note_links)} 篇笔记")
-                return list(dict.fromkeys(note_links))[:limit]
-
-            logger.warning("未能从页面提取到笔记 ID")
-            return []
-
+            with sync_playwright() as p:
+                # 启动浏览器
+                browser = p.chromium.launch(headless=True)
+                context = browser.new_context(
+                    user_agent=self.headers["User-Agent"],
+                    cookie=[{"name": k, "value": v, "domain": ".xiaohongshu.com", "path": "/"} for k, v in self.cookie.items()]
+                )
+                page = context.new_page()
+                
+                # 访问搜索页面
+                url = f"{CRAWLER_CONFIG['BASE_URL']}/search_result?keyword={keyword}&source=web_explore_feed"
+                logger.info(f"访问搜索页面：{url}")
+                page.goto(url, timeout=30000)
+                
+                # 等待页面加载完成
+                page.wait_for_timeout(5000)
+                
+                # 尝试从 JavaScript 上下文中提取数据
+                note_data = page.evaluate("""
+                    () => {
+                        const state = window.__INITIAL_STATE__;
+                        if (state && state.feed && state.feed.feeds) {
+                            const feeds = state.feed.feeds._rawValue || state.feed.feeds._value;
+                            if (Array.isArray(feeds)) {
+                                return feeds.map(item => ({
+                                    id: item.id,
+                                    modelType: item.model_type || item.modelType,
+                                    noteCard: item.note_card || item.noteCard
+                                })).filter(item => item.id);
+                            }
+                        }
+                        return [];
+                    }
+                """)
+                
+                browser.close()
+                
+                if note_data:
+                    note_ids = [item["id"] for item in note_data if item.get("id")]
+                    logger.info(f"从页面提取到 {len(note_ids)} 篇笔记")
+                    return note_ids[:limit]
+                
+                # 备用方案：从 HTML 中提取
+                html = page.content()
+                note_ids = self._extract_note_ids_from_html(html)
+                if note_ids:
+                    return note_ids[:limit]
+                
+                logger.warning("未能从页面提取到笔记 ID")
+                return []
+                
         except Exception as e:
             logger.error(f"搜索失败：{e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return []
 
     def _extract_note_ids_from_html(self, html: str) -> list:
