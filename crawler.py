@@ -115,15 +115,117 @@ class XiaohongshuCrawler:
 
         for attempt in range(retry):
             try:
-                # TODO: 实现详情获取逻辑
-                pass
-            except Exception as e:
-                logger.warning(f"第 {attempt + 1} 次尝试失败：{e}")
+                url = f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}"
+                response = self.session.get(url, timeout=30)
+                response.raise_for_status()
+
+                html = response.text
+
+                # 解析笔记详情
+                detail = self._parse_note_detail(html, note_id)
+
+                if detail:
+                    return detail
+                else:
+                    logger.warning(f"无法解析笔记详情：{note_id}")
+                    return None
+
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"第 {attempt + 1} 次请求失败：{e}")
                 if attempt < retry - 1:
-                    time.sleep(CRAWLER_CONFIG["RETRY_DELAY"] * (2 ** attempt))
-                continue
+                    delay = CRAWLER_CONFIG["RETRY_DELAY"] * (2 ** attempt)
+                    time.sleep(delay)
+                    continue
+            except Exception as e:
+                logger.error(f"解析错误：{e}")
+                return None
 
         return None
+
+    def _parse_note_detail(self, html: str, note_id: str) -> Optional[dict]:
+        """
+        解析笔记详情页面
+
+        Args:
+            html: 页面 HTML
+            note_id: 笔记 ID
+
+        Returns:
+            笔记详情字典
+        """
+        import re
+        import json
+
+        try:
+            # 查找页面数据
+            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})</script>'
+            match = re.search(pattern, html, re.DOTALL)
+
+            if not match:
+                return None
+
+            data = json.loads(match.group(1))
+
+            # 提取笔记数据
+            note_data = None
+            if "note" in data:
+                note_data = data["note"]
+            elif "noteDetail" in data:
+                note_data = data["noteDetail"]
+
+            if not note_data:
+                return None
+
+            # 提取字段
+            note_info = note_data.get("note", {}) if isinstance(note_data, dict) else note_data
+
+            # 作者信息
+            user_info = note_data.get("user", {})
+            author = user_info.get("nickname", "") if isinstance(user_info, dict) else ""
+
+            # 标题和正文
+            title = note_info.get("title", "")
+            content = note_info.get("desc", "")
+
+            # 互动数据
+            interactions = note_info.get("interactInfo", {})
+            like_count = interactions.get("likedCount", 0)
+            collect_count = interactions.get("collectedCount", 0)
+            comment_count = interactions.get("commentCount", 0)
+
+            # 封面
+            images = note_info.get("imageList", [])
+            cover_url = images[0].get("url", "") if images else ""
+
+            # 如果没有图片，检查是否是视频
+            if not cover_url:
+                video_info = note_info.get("video", {})
+                cover_url = video_info.get("coverUrl", "") if isinstance(video_info, dict) else ""
+
+            # 发布时间
+            time_info = note_info.get("time", {})
+            publish_time = time_info if isinstance(time_info, str) else ""
+
+            return {
+                "序号": 0,  # 由调用方设置
+                "作者": clean_text(author),
+                "标题": clean_text(title),
+                "点赞数": int(like_count) if like_count else 0,
+                "收藏数": int(collect_count) if collect_count else 0,
+                "评论数": int(comment_count) if comment_count else 0,
+                "封面 URL": cover_url,
+                "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}",
+                "正文内容": clean_text(content),
+                "发布时间": publish_time,
+                "状态": "成功",
+            }
+
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON 解析失败：{e}")
+            return None
+        except Exception as e:
+            logger.error(f"解析失败：{e}")
+            return None
 
     def crawl(self, keyword: str, limit: int = 30) -> list:
         """
