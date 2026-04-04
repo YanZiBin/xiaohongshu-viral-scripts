@@ -37,9 +37,68 @@ class XiaohongshuCrawler:
         """
         logger.info(f"开始搜索关键词：{keyword}")
 
-        # TODO: 实现搜索逻辑
-        # 需要分析实际 API 端点
-        pass
+        # 构造搜索 URL
+        params = {
+            "keyword": keyword,
+            "source": "web_explore_feed",
+        }
+
+        url = f"{CRAWLER_CONFIG['BASE_URL']}/search_result"
+
+        try:
+            response = self.session.get(url, params=params, timeout=30)
+            response.raise_for_status()
+
+            # 尝试从页面提取笔记 ID
+            # 小红书页面数据通常在 <script> 标签的 JSON 中
+            import re
+            html = response.text
+
+            # 查找包含笔记数据的 JSON
+            # 常见模式：<script>window.__INITIAL_STATE__={...}</script>
+            pattern = r'window\.__INITIAL_STATE__\s*=\s*({.+?})</script>'
+            match = re.search(pattern, html, re.DOTALL)
+
+            if match:
+                import json
+                data = json.loads(match.group(1))
+                # 根据实际数据结构提取笔记 ID
+                note_ids = self._extract_note_ids_from_state(data)
+                return note_ids
+
+            # 备用方案：从 HTML 中提取笔记链接
+            note_links = re.findall(r'/discovery/item/([a-zA-Z0-9]+)', html)
+            return list(dict.fromkeys(note_links))  # 去重保持顺序
+
+        except Exception as e:
+            logger.error(f"搜索失败：{e}")
+            return []
+
+    def _extract_note_ids_from_state(self, data: dict) -> list:
+        """
+        从 INITIAL_STATE 中提取笔记 ID
+
+        Args:
+            data: 页面状态数据
+
+        Returns:
+            笔记 ID 列表
+        """
+        note_ids = []
+
+        # 需要根据实际数据结构调整
+        # 常见路径：searchResult -> notes 或 explore -> items
+        try:
+            if "searchResult" in data:
+                notes = data["searchResult"].get("notes", [])
+                note_ids = [note.get("id", "") for note in notes if note.get("id")]
+            elif "explore" in data:
+                notes = data["explore"].get("items", [])
+                note_ids = [note.get("id", "") for note in notes if note.get("id")]
+        except Exception as e:
+            logger.warning(f"解析 INITIAL_STATE 失败：{e}")
+
+        return note_ids
 
     def get_note_detail(self, note_id: str, retry: int = 3) -> Optional[dict]:
         """
