@@ -73,32 +73,86 @@ class XiaohongshuCrawler:
                 page.goto(url, timeout=60000)
                 
                 # 等待页面加载完成
-                page.wait_for_timeout(5000)
+                page.wait_for_timeout(8000)
                 
-                # 尝试从 JavaScript 上下文中提取数据
-                note_data = page.evaluate("""
+                # 尝试多种方法提取数据
+                note_data = []
+                
+                # 方法 1：从 __INITIAL_STATE__ 提取
+                state_check = page.evaluate("""
                     () => {
                         const state = window.__INITIAL_STATE__;
-                        console.log('State exists:', !!state);
-                        console.log('State keys:', state ? Object.keys(state) : []);
-                        if (state && state.feed && state.feed.feeds) {
+                        if (!state) return { exists: false };
+                        
+                        const result = { exists: true, keys: Object.keys(state) };
+                        
+                        if (state.feed && state.feed.feeds) {
                             const feeds = state.feed.feeds._rawValue || state.feed.feeds._value;
-                            console.log('Feeds:', feeds ? feeds.length : 0);
-                            if (Array.isArray(feeds)) {
-                                return feeds.map(item => ({
-                                    id: item.id,
-                                    modelType: item.model_type || item.modelType,
-                                    noteCard: item.note_card || item.noteCard
-                                })).filter(item => item.id);
-                            }
+                            result.hasFeeds = !!feeds;
+                            result.feedsLength = feeds ? feeds.length : 0;
                         }
-                        return [];
+                        
+                        if (state.searchResult) {
+                            result.hasSearchResult = true;
+                            result.searchResultKeys = Object.keys(state.searchResult);
+                        }
+                        
+                        return result;
                     }
                 """)
                 
+                logger.info(f"State 检查：{state_check}")
+                
+                # 如果 __INITIAL_STATE__ 有数据，尝试提取
+                if state_check.get('exists') and (state_check.get('hasFeeds') or state_check.get('hasSearchResult')):
+                    note_data = page.evaluate("""
+                        () => {
+                            const state = window.__INITIAL_STATE__;
+                            
+                            // 尝试从 feed 提取
+                            if (state.feed && state.feed.feeds) {
+                                const feeds = state.feed.feeds._rawValue || state.feed.feeds._value;
+                                if (Array.isArray(feeds)) {
+                                    return feeds.map(item => ({
+                                        id: item.id,
+                                        modelType: item.model_type || item.modelType
+                                    })).filter(item => item.id);
+                                }
+                            }
+                            
+                            // 尝试从 searchResult 提取
+                            if (state.searchResult && state.searchResult.notes) {
+                                return state.searchResult.notes.map(item => ({
+                                    id: item.id,
+                                    modelType: item.model_type || item.modelType
+                                })).filter(item => item.id);
+                            }
+                            
+                            return [];
+                        }
+                    """)
+                
                 logger.info(f"提取到的数据：{len(note_data)} 条")
-                if note_data:
-                    logger.info(f"第一条数据：{note_data[0]}")
+                
+                # 方法 2：如果 __INITIAL_STATE__ 没有数据，从 DOM 提取笔记链接
+                if not note_data:
+                    note_ids_from_dom = page.evaluate("""
+                        () => {
+                            const links = Array.from(document.querySelectorAll('a[href*="/discovery/item/"]'));
+                            const ids = links.map(link => {
+                                const href = link.href;
+                                const match = href.match(/\/discovery\/item\/([a-zA-Z0-9]+)/);
+                                return match ? match[1] : null;
+                            }).filter(id => id);
+                            
+                            // 去重
+                            return [...new Set(ids)];
+                        }
+                    """)
+                    
+                    if note_ids_from_dom:
+                        note_data = [{"id": note_id} for note_id in note_ids_from_dom]
+                        logger.info(f"从 DOM 提取到 {len(note_data)} 篇笔记")
                 
                 browser.close()
                 
