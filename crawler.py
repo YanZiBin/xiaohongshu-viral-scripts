@@ -30,7 +30,7 @@ class XiaohongshuCrawler:
 
     def search_notes(self, keyword: str, limit: int = 30) -> list:
         """
-        搜索笔记（使用 Playwright 获取动态加载的数据）
+        搜索笔记（使用 Playwright 模拟真实浏览器）
 
         Args:
             keyword: 搜索关键词
@@ -43,7 +43,7 @@ class XiaohongshuCrawler:
 
         try:
             with sync_playwright() as p:
-                # 启动浏览器，添加规避检测的参数
+                # 启动浏览器（有头模式，便于调试）
                 browser = p.chromium.launch(
                     headless=True,
                     args=[
@@ -72,102 +72,51 @@ class XiaohongshuCrawler:
                 logger.info(f"访问搜索页面：{url}")
                 page.goto(url, timeout=60000)
                 
-                # 等待页面加载完成
+                # 等待页面初始加载
                 page.wait_for_timeout(5000)
                 
                 # 滚动页面加载更多内容
                 logger.info("滚动页面加载数据...")
-                for i in range(3):
-                    page.evaluate("window.scrollBy(0, window.innerHeight)")
-                    page.wait_for_timeout(2000)
+                for i in range(5):
+                    page.evaluate("window.scrollBy(0, 500)")
+                    page.wait_for_timeout(1500)
                 
-                # 尝试多种方法提取数据
-                note_data = []
-                
-                # 方法 1：从 __INITIAL_STATE__ 提取
-                state_check = page.evaluate("""
+                # 从 DOM 提取笔记卡片信息
+                logger.info("从 DOM 提取笔记数据...")
+                note_data = page.evaluate("""
                     () => {
-                        const state = window.__INITIAL_STATE__;
-                        if (!state) return { exists: false };
+                        // 查找所有笔记卡片
+                        const cards = document.querySelectorAll('[class*="note-card"], [class*="note-item"], [class*="feed-item"]');
+                        console.log('找到卡片数量:', cards.length);
                         
-                        const result = { exists: true, keys: Object.keys(state) };
+                        const notes = [];
+                        cards.forEach((card, index) => {
+                            // 提取笔记 ID
+                            const link = card.querySelector('a[href*="/discovery/item/"]');
+                            const href = link ? link.href : '';
+                            const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
+                            const id = idMatch ? idMatch[1] : null;
+                            
+                            if (id) {
+                                notes.push({ id });
+                            }
+                        });
                         
-                        if (state.feed && state.feed.feeds) {
-                            const feeds = state.feed.feeds._rawValue || state.feed.feeds._value;
-                            result.hasFeeds = !!feeds;
-                            result.feedsLength = feeds ? feeds.length : 0;
-                        }
-                        
-                        if (state.searchResult) {
-                            result.hasSearchResult = true;
-                            result.searchResultKeys = Object.keys(state.searchResult);
-                        }
-                        
-                        return result;
+                        console.log('提取到的笔记 ID 数量:', notes.length);
+                        return notes;
                     }
                 """)
-                
-                logger.info(f"State 检查：{state_check}")
-                
-                # 如果 __INITIAL_STATE__ 有数据，尝试提取
-                if state_check.get('exists') and (state_check.get('hasFeeds') or state_check.get('hasSearchResult')):
-                    note_data = page.evaluate("""
-                        () => {
-                            const state = window.__INITIAL_STATE__;
-                            
-                            // 尝试从 feed 提取
-                            if (state.feed && state.feed.feeds) {
-                                const feeds = state.feed.feeds._rawValue || state.feed.feeds._value;
-                                if (Array.isArray(feeds) && feeds.length > 0) {
-                                    return feeds.map(item => ({
-                                        id: item.id,
-                                        modelType: item.model_type || item.modelType
-                                    })).filter(item => item.id);
-                                }
-                            }
-                            
-                            // 尝试从 searchResult 提取
-                            if (state.searchResult && state.searchResult.notes) {
-                                return state.searchResult.notes.map(item => ({
-                                    id: item.id,
-                                    modelType: item.model_type || item.modelType
-                                })).filter(item => item.id);
-                            }
-                            
-                            return [];
-                        }
-                    """)
-                
-                logger.info(f"从 JS 提取到的数据：{len(note_data)} 条")
-                
-                # 方法 2：如果 __INITIAL_STATE__ 没有数据，从 DOM 提取笔记链接
-                if not note_data:
-                    note_ids_from_dom = page.evaluate("""
-                        () => {
-                            const links = Array.from(document.querySelectorAll('a[href*="/discovery/item/"]'));
-                            const ids = links.map(link => {
-                                const href = link.href;
-                                const match = href.match(/\/discovery\/item\/([a-zA-Z0-9]+)/);
-                                return match ? match[1] : null;
-                            }).filter(id => id);
-                            
-                            // 去重
-                            return [...new Set(ids)];
-                        }
-                    """)
-                    
-                    if note_ids_from_dom:
-                        note_data = [{"id": note_id} for note_id in note_ids_from_dom]
-                        logger.info(f"从 DOM 提取到 {len(note_data)} 篇笔记")
                 
                 browser.close()
                 
                 if note_data:
                     note_ids = [item["id"] for item in note_data if item.get("id")]
-                    logger.info(f"从页面提取到 {len(note_ids)} 篇笔记")
+                    # 去重
+                    note_ids = list(dict.fromkeys(note_ids))
+                    logger.info(f"从 DOM 提取到 {len(note_ids)} 篇笔记")
                     return note_ids[:limit]
                 
-                logger.warning("未能从页面提取到笔记 ID")
+                logger.warning("未能从 DOM 提取到笔记 ID")
                 return []
                 
         except Exception as e:
