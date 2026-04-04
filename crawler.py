@@ -213,19 +213,42 @@ class XiaohongshuCrawler:
                 page.goto(url, timeout=60000)
                 page.wait_for_timeout(5000)
                 
-                # 点击筛选
-                logger.info("点击筛选...")
-                self._click_filter(page)
-                page.wait_for_timeout(3000)
+                # 保存初始截图
+                page.screenshot(path="debug_01_initial.png")
+                logger.info("已保存初始截图")
+                
+                # 先提取一次笔记（不筛选）
+                logger.info("提取初始笔记列表...")
+                cards = self._extract_note_cards(page)
+                logger.info(f"初始页面找到 {len(cards)} 篇笔记")
+                
+                # 如果没有笔记，尝试点击筛选
+                if len(cards) == 0:
+                    logger.info("尝试点击筛选...")
+                    self._click_filter(page)
+                    page.wait_for_timeout(3000)
+                    page.screenshot(path="debug_02_filtered.png")
+                    
+                    # 再次提取
+                    cards = self._extract_note_cards(page)
+                    logger.info(f"筛选后找到 {len(cards)} 篇笔记")
+                
+                # 如果还是没有，尝试直接滚动
+                if len(cards) == 0:
+                    logger.info("尝试滚动加载...")
+                    for i in range(3):
+                        page.evaluate("window.scrollBy(0, 500)")
+                        page.wait_for_timeout(2000)
+                        page.screenshot(path=f"debug_03_scroll_{i}.png")
+                        cards = self._extract_note_cards(page)
+                        if cards:
+                            logger.info(f"滚动后找到 {len(cards)} 篇笔记")
+                            break
                 
                 # 开始爬取笔记
                 crawled_ids = set()
                 
                 while len(notes) < limit:
-                    # 获取当前页面所有笔记卡片
-                    cards = self._extract_note_cards(page)
-                    logger.info(f"当前页面找到 {len(cards)} 篇笔记")
-                    
                     if not cards:
                         logger.warning("没有找到更多笔记")
                         break
@@ -254,6 +277,7 @@ class XiaohongshuCrawler:
                                 continue
                             
                             page.wait_for_timeout(3000)
+                            page.screenshot(path=f"debug_note_{card['id']}.png")
                             
                             # 获取详情
                             detail = self._get_note_detail_from_page(page, card['id'])
@@ -265,7 +289,6 @@ class XiaohongshuCrawler:
                                 logger.info(f"成功获取笔记：{detail['标题'][:20] if detail['标题'] else '无标题'}...")
                             else:
                                 logger.warning(f"无法获取笔记详情：{card['id']}")
-                                # 标记为无法访问
                                 notes.append({
                                     "序号": len(notes) + 1,
                                     "作者": "",
@@ -297,6 +320,7 @@ class XiaohongshuCrawler:
                     logger.info("滚动页面加载更多...")
                     page.evaluate("window.scrollBy(0, 800)")
                     page.wait_for_timeout(3000)
+                    cards = self._extract_note_cards(page)
                 
                 browser.close()
                 return notes
