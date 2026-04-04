@@ -79,8 +79,11 @@ class XiaohongshuCrawler:
                 note_data = page.evaluate("""
                     () => {
                         const state = window.__INITIAL_STATE__;
+                        console.log('State exists:', !!state);
+                        console.log('State keys:', state ? Object.keys(state) : []);
                         if (state && state.feed && state.feed.feeds) {
                             const feeds = state.feed.feeds._rawValue || state.feed.feeds._value;
+                            console.log('Feeds:', feeds ? feeds.length : 0);
                             if (Array.isArray(feeds)) {
                                 return feeds.map(item => ({
                                     id: item.id,
@@ -92,6 +95,10 @@ class XiaohongshuCrawler:
                         return [];
                     }
                 """)
+                
+                logger.info(f"提取到的数据：{len(note_data)} 条")
+                if note_data:
+                    logger.info(f"第一条数据：{note_data[0]}")
                 
                 browser.close()
                 
