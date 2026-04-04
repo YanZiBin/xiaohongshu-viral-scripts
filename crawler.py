@@ -43,12 +43,19 @@ class XiaohongshuCrawler:
 
         try:
             with sync_playwright() as p:
-                # 启动浏览器
-                browser = p.chromium.launch(headless=True)
-                context = browser.new_context(
-                    user_agent=self.headers["User-Agent"]
+                # 启动浏览器，添加规避检测的参数
+                browser = p.chromium.launch(
+                    headless=True,
+                    args=[
+                        '--disable-blink-features=AutomationControlled',
+                        '--no-sandbox',
+                        '--disable-dev-shm-usage',
+                    ]
                 )
-                page = context.new_page()
+                context = browser.new_context(
+                    user_agent=self.headers["User-Agent"],
+                    viewport={"width": 1920, "height": 1080},
+                )
                 
                 # 设置 Cookie
                 context.add_cookies([{
@@ -56,8 +63,6 @@ class XiaohongshuCrawler:
                     "value": v,
                     "domain": ".xiaohongshu.com",
                     "path": "/",
-                    "httpOnly": True,
-                    "secure": True
                 } for k, v in self.cookie.items()])
                 
                 page = context.new_page()
@@ -65,7 +70,7 @@ class XiaohongshuCrawler:
                 # 访问搜索页面
                 url = f"{CRAWLER_CONFIG['BASE_URL']}/search_result?keyword={keyword}&source=web_explore_feed"
                 logger.info(f"访问搜索页面：{url}")
-                page.goto(url, timeout=30000)
+                page.goto(url, timeout=60000)
                 
                 # 等待页面加载完成
                 page.wait_for_timeout(5000)
@@ -93,12 +98,6 @@ class XiaohongshuCrawler:
                 if note_data:
                     note_ids = [item["id"] for item in note_data if item.get("id")]
                     logger.info(f"从页面提取到 {len(note_ids)} 篇笔记")
-                    return note_ids[:limit]
-                
-                # 备用方案：从 HTML 中提取
-                html = page.content()
-                note_ids = self._extract_note_ids_from_html(html)
-                if note_ids:
                     return note_ids[:limit]
                 
                 logger.warning("未能从页面提取到笔记 ID")
