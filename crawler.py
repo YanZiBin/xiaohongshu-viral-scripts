@@ -329,26 +329,43 @@ class XiaohongshuCrawler:
             title = note_info.get("title", "") if isinstance(note_info, dict) else ""
             content = note_info.get("desc", "") if isinstance(note_info, dict) else ""
 
-            # 互动数据
+            # 互动数据 - 尝试不同的字段名格式（驼峰和下划线）
             interactions = note_info.get("interactInfo", {}) if isinstance(note_info, dict) else {}
-            like_count = interactions.get("likedCount", 0)
-            collect_count = interactions.get("collectedCount", 0)
-            comment_count = interactions.get("commentCount", 0)
+            if not interactions:
+                interactions = note_info.get("interact_info", {})
+            
+            like_count = interactions.get("likedCount") or interactions.get("liked_count", 0)
+            collect_count = interactions.get("collectedCount") or interactions.get("collected_count", 0)
+            comment_count = interactions.get("commentCount") or interactions.get("comment_count", 0)
 
-            # 封面
+            # 封面 - 尝试不同的字段名
             images = note_info.get("imageList", []) if isinstance(note_info, dict) else []
+            if not images:
+                images = note_info.get("image_list", [])
+            
             cover_url = ""
             if images and isinstance(images, list) and len(images) > 0:
-                cover_url = images[0].get("url", "") if isinstance(images[0], dict) else ""
+                first_image = images[0] if isinstance(images[0], dict) else {}
+                cover_url = first_image.get("urlDefault", "") or first_image.get("url_default", "") or first_image.get("url", "")
             
             # 如果没有图片，检查是否是视频
             if not cover_url:
                 video_info = note_info.get("video", {}) if isinstance(note_info, dict) else {}
-                cover_url = video_info.get("coverUrl", "") if isinstance(video_info, dict) else ""
+                cover_url = video_info.get("coverUrl", "") or video_info.get("cover_url", "")
 
             # 发布时间
-            time_info = note_info.get("time", {})
-            publish_time = time_info if isinstance(time_info, str) else ""
+            time_info = note_info.get("time", "")
+            if isinstance(time_info, (int, float)) and time_info > 0:
+                # 时间戳转换为日期字符串
+                try:
+                    from datetime import datetime
+                    publish_time = datetime.fromtimestamp(time_info / 1000).strftime("%Y-%m-%d %H:%M:%S")
+                except:
+                    publish_time = str(time_info)
+            elif isinstance(time_info, str):
+                publish_time = time_info
+            else:
+                publish_time = ""
 
             return {
                 "序号": 0,  # 由调用方设置
