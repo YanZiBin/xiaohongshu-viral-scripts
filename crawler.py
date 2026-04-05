@@ -267,7 +267,17 @@ class XiaohongshuCrawler:
             except:
                 pass
             
+            # 滚动到顶部确保互动数据加载
+            page.evaluate("window.scrollTo(0, 0)")
             page.wait_for_timeout(1500)
+            
+            # 等待互动数据加载（等待点赞数出现）
+            try:
+                page.wait_for_selector('.engage-bar span.count, [class*="interact"] span.count', timeout=3000)
+            except:
+                pass
+            
+            page.wait_for_timeout(1000)
 
             # 从 DOM 元素直接提取（根据 F12 截图的精确选择器）
             note_info = page.evaluate("""
@@ -281,10 +291,12 @@ class XiaohongshuCrawler:
                     // 作者：在 author-container 内
                     const authorEl = document.querySelector('.author-container .username, .author .username, [class*="user-name"]');
                     
-                    // 互动数据：.interaction-container 内的 span.count (按顺序：点赞、收藏、评论)
-                    const countEls = document.querySelectorAll('.interaction-container .engage-bar span.count, [class*="interact"] span.count');
+                    // 互动数据：.engage-bar 内的 span.count（这是笔记本身的点赞/收藏/评论）
+                    // 使用 querySelectorAll 获取所有 count，然后按顺序取
+                    const engageBar = document.querySelector('.engage-bar');
+                    const countEls = engageBar ? engageBar.querySelectorAll('span.count') : [];
                     
-                    // 图片：取第一张图的 src
+                    // 获取主图
                     const imgEl = document.querySelector('.img-container img, .swiper-slide-active img, article img');
                     
                     // 视频封面
@@ -306,7 +318,7 @@ class XiaohongshuCrawler:
                     const desc = descEl ? descEl.textContent?.trim() || '' : '';
                     const author = getText(authorEl);
                     
-                    // 按顺序获取点赞、收藏、评论数
+                    // 按顺序获取点赞、收藏、评论数（从 engage-bar 获取，确保是笔记本身的）
                     const likeCount = countEls.length > 0 ? getNumber(countEls[0]) : 0;
                     const collectCount = countEls.length > 1 ? getNumber(countEls[1]) : 0;
                     const commentCount = countEls.length > 2 ? getNumber(countEls[2]) : 0;
