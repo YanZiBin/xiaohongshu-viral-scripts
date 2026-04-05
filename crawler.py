@@ -234,34 +234,34 @@ class XiaohongshuCrawler:
                 window.scrollTo(0, {max(0, int(card.get('top', 0) - 100))});
             }}
         """)
-        page.wait_for_timeout(500)
+        page.wait_for_timeout(200)
 
     def _get_note_detail_from_page(self, page: Page, note_id: str) -> Optional[dict]:
         """从笔记详情页获取数据（基于 F12 看到的精确选择器）"""
         try:
-            # 等待页面加载完成
+            # 等待页面加载完成（缩短超时）
             try:
-                page.wait_for_url(f"*{note_id}*", timeout=5000)
+                page.wait_for_url(f"*{note_id}*", timeout=2000)
             except:
                 pass
             
             # 等待笔记内容加载
             try:
-                page.wait_for_selector('#detail-title', timeout=3000)
+                page.wait_for_selector('#detail-title', timeout=1500)
             except:
                 pass
             
             # 滚动到顶部确保互动数据加载
             page.evaluate("window.scrollTo(0, 0)")
-            page.wait_for_timeout(1500)
+            page.wait_for_timeout(500)
             
-            # 等待互动数据加载（等待点赞数出现）
+            # 等待互动数据加载
             try:
-                page.wait_for_selector('.engage-bar span.count, [class*="interact"] span.count', timeout=3000)
+                page.wait_for_selector('.engage-bar span.count', timeout=1500)
             except:
                 pass
             
-            page.wait_for_timeout(1000)
+            page.wait_for_timeout(300)
 
             # 从 DOM 元素直接提取（根据 F12 截图的精确选择器）
             note_info = page.evaluate("""
@@ -383,7 +383,7 @@ class XiaohongshuCrawler:
                 url = f"{CRAWLER_CONFIG['BASE_URL']}/search_result?keyword={keyword}&source=web_explore_feed"
                 logger.info(f"访问搜索页面：{url}")
                 page.goto(url, timeout=60000)
-                page.wait_for_timeout(3000)
+                page.wait_for_timeout(2000)
                 
                 # 设置页面缩放为 100%
                 page.evaluate("document.body.style.zoom = '1'")
@@ -467,13 +467,13 @@ class XiaohongshuCrawler:
                         try:
                             # 滚动到元素位置
                             self._scroll_to_element(page, card)
-                            page.wait_for_timeout(500)
+                            page.wait_for_timeout(200)
                             
                             # 点击笔记
                             card_element = self._find_card_element(page, card["id"])
                             if card_element:
                                 card_element.scroll_into_view_if_needed()
-                                page.wait_for_timeout(300)
+                                page.wait_for_timeout(100)
                                 card_element.click()
                             else:
                                 logger.warning(f"找不到笔记元素：{card['id']}")
@@ -482,14 +482,7 @@ class XiaohongshuCrawler:
                                 crawled_ids.add(card['id'])
                                 continue
                             
-                            page.wait_for_timeout(3000)
-                            
-                            # 设置详情页缩放为 100%
-                            page.evaluate("document.body.style.zoom = '1'")
-                            page.evaluate("document.documentElement.style.zoom = '1'")
-                            page.wait_for_timeout(500)
-                            
-                            # 获取详情
+                            # 获取详情（缩短等待）
                             detail = self._get_note_detail_from_page(page, card['id'])
                             
                             if detail:
@@ -506,7 +499,7 @@ class XiaohongshuCrawler:
                             
                             # 返回搜索结果页
                             page.go_back()
-                            page.wait_for_timeout(2000)
+                            page.wait_for_timeout(1000)
                             
                         except Exception as e:
                             failed_counts[card['id']] = failed_counts.get(card['id'], 0) + 1
@@ -527,7 +520,7 @@ class XiaohongshuCrawler:
                     # 滚动页面，加载更多笔记
                     logger.info("滚动页面加载更多...")
                     page.evaluate("window.scrollBy(0, 1000)")
-                    page.wait_for_timeout(2000)
+                    page.wait_for_timeout(1000)
                     scroll_count += 1
                     
                     cards = self._extract_note_cards(page)
