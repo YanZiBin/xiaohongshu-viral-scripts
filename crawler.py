@@ -57,29 +57,6 @@ class XiaohongshuCrawler:
         
         return browser, context
 
-    def _click_filter(self, page: Page):
-        """鼠标移动到筛选按钮，然后点击'一周内'"""
-        try:
-            # 找到筛选按钮
-            filter_btn = page.locator('div.filter, [class*="filter"]:has-text("筛选"), span:has-text("筛选")').first
-            if filter_btn.is_visible():
-                # 鼠标悬停（会弹出选项）
-                filter_btn.hover()
-                page.wait_for_timeout(1000)
-                
-                # 点击"一周内"
-                one_week_btn = page.locator('div.tags:has-text("一周内"), button:has-text("一周内"), span:has-text("一周内")').first
-                if one_week_btn.is_visible():
-                    one_week_btn.click()
-                    page.wait_for_timeout(2000)
-                    logger.info("已筛选'一周内'")
-                else:
-                    logger.warning("未找到'一周内'选项")
-            else:
-                logger.warning("未找到筛选按钮")
-        except Exception as e:
-            logger.warning(f"筛选失败：{e}")
-
     def _extract_note_cards(self, page: Page) -> list:
         """获取当前页面所有笔记卡片的位置信息"""
         return page.evaluate("""
@@ -407,17 +384,22 @@ class XiaohongshuCrawler:
                 url = f"{CRAWLER_CONFIG['BASE_URL']}/search_result?keyword={keyword}&source=web_explore_feed"
                 logger.info(f"访问搜索页面：{url}")
                 page.goto(url, timeout=60000)
-                page.wait_for_timeout(5000)
+                page.wait_for_timeout(3000)
                 
                 # 设置页面缩放为 100%
+                page.evaluate("document.body.style.zoom = '1'")
                 page.evaluate("document.documentElement.style.zoom = '1'")
                 
-                # 先提取一次笔记（不筛选）
-                logger.info("提取初始笔记列表...")
+                # 等待用户手动筛选
+                print("\n请在浏览器中手动进行筛选（如选择'一周内'、'最多点赞'等）")
+                input("筛选完成后，在此按回车键开始爬取...")
+                
+                # 提取笔记列表
+                logger.info("提取笔记列表...")
                 cards = self._extract_note_cards(page)
                 if not cards:
                     cards = self._extract_note_cards_from_html(page.content())
-                logger.info(f"初始页面找到 {len(cards)} 篇笔记")
+                logger.info(f"找到 {len(cards)} 篇笔记")
                 
                 # 如果没有笔记，尝试点击筛选
                 if len(cards) == 0:
