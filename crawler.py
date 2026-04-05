@@ -258,112 +258,116 @@ class XiaohongshuCrawler:
             # 等待页面加载
             page.wait_for_timeout(3000)
 
-            # 方法 1: 尝试从 __INITIAL_STATE__ 获取数据
-            note_state = page.evaluate("""
+            # 方法 1: 尝试从 DOM 元素直接提取（根据 F12 看到的结构）- 优先使用，避免序列化问题
+            dom_info = page.evaluate("""
                 () => {
-                    const state = window.__INITIAL_STATE__;
-                    return state?.note || null;
+                    // 从 DOM 元素提取
+                    const titleEl = document.querySelector('#detail-title, .title, [class*="title"]');
+                    const descEl = document.querySelector('#detail-desc, .desc, [class*="desc"], .content');
+                    const authorEl = document.querySelector('.user-name, [class*="user-name"], [class*="username"], .nickname');
+                    
+                    // 获取点赞、收藏、评论数 - 使用更精确的选择器
+                    const likeEl = document.querySelector('[class*="like"] span.count, .interaction span.count');
+                    const collectEl = document.querySelector('[class*="collect"] span.count, .interaction span.count');
+                    const commentEl = document.querySelector('[class*="comment"] span.count, .interaction span.count');
+                    
+                    // 获取封面图片
+                    const imgEl = document.querySelector('article img, .cover img, img[src*="http"], .image img');
+                    
+                    const getText = (el) => el ? el.textContent?.trim() || '' : '';
+                    const getNumber = (el) => {
+                        const text = getText(el);
+                        const num = text.match(/[\\d,]+/);
+                        return num ? parseInt(num[0].replace(/,/g, '')) : 0;
+                    };
+                    
+                    const title = getText(titleEl);
+                    const desc = getText(descEl);
+                    const author = getText(authorEl);
+                    const likeCount = getNumber(likeEl);
+                    const collectCount = getNumber(collectEl);
+                    const commentCount = getNumber(commentEl);
+                    const cover = imgEl?.src || imgEl?.getAttribute('src') || '';
+                    
+                    if (!title && !desc && !author) return null;
+                    
+                    return {
+                        author,
+                        title,
+                        desc,
+                        likeCount,
+                        collectCount,
+                        commentCount,
+                        cover
+                    };
                 }
             """)
-            note_info = self._parse_note_info_from_state(note_state, note_id)
             
-            # 方法 2: 尝试从 DOM 元素直接提取（根据 F12 看到的结构）
-            if not note_info:
-                dom_info = page.evaluate("""
-                    () => {
-                        // 从 DOM 元素提取
-                        const titleEl = document.querySelector('#detail-title, .title, [class*="title"]');
-                        const descEl = document.querySelector('#detail-desc, .desc, [class*="desc"]');
-                        const authorEl = document.querySelector('.user-name, [class*="user-name"], [class*="username"]');
-                        
-                        // 获取点赞、收藏、评论数
-                        const likeEl = document.querySelector('.like-count, [class*="like"] .count, span.count');
-                        const collectEl = document.querySelector('.collect-count, [class*="collect"] .count, span.count');
-                        const commentEl = document.querySelector('.comment-count, [class*="comment"] .count, span.count');
-                        
-                        // 获取封面图片
-                        const imgEl = document.querySelector('article img, .cover img, img[src*="http"]');
-                        
-                        const getText = (el) => el ? el.textContent?.trim() || '' : '';
-                        const getNumber = (el) => {
-                            const text = getText(el);
-                            const num = text.match(/[\\d,]+/);
-                            return num ? parseInt(num[0].replace(/,/g, '')) : 0;
-                        };
-                        
-                        const title = getText(titleEl);
-                        const desc = getText(descEl);
-                        const author = getText(authorEl);
-                        const likeCount = getNumber(likeEl);
-                        const collectCount = getNumber(collectEl);
-                        const commentCount = getNumber(commentEl);
-                        const cover = imgEl?.src || imgEl?.getAttribute('src') || '';
-                        
-                        if (!title && !desc && !author) return null;
-                        
-                        return {
-                            author,
-                            title,
-                            desc,
-                            likeCount,
-                            collectCount,
-                            commentCount,
-                            cover
-                        };
-                    }
-                """)
-                
-                if dom_info and any(dom_info.get(field) for field in ("author", "title", "desc")):
-                    note_info = dom_info
+            if dom_info and any(dom_info.get(field) for field in ("author", "title", "desc")):
+                return {
+                    "序号": 0,
+                    "作者": clean_text(dom_info.get("author", "")),
+                    "标题": clean_text(dom_info.get("title", "")),
+                    "点赞数": format_number(str(dom_info.get("likeCount", 0))),
+                    "收藏数": format_number(str(dom_info.get("collectCount", 0))),
+                    "评论数": format_number(str(dom_info.get("commentCount", 0))),
+                    "封面 URL": dom_info.get("cover", ""),
+                    "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}",
+                    "正文内容": clean_text(dom_info.get("desc", "")),
+                    "发布时间": "",
+                    "状态": "成功",
+                }
             
-            # 方法 3: 尝试 legacy 方式
-            if not note_info:
-                legacy_note_info = page.evaluate("""
-                    () => {
-                        const state = window.__INITIAL_STATE__;
-                        if (!state) return null;
-                        
-                        let noteData = state.note || state.noteDetail || state.noteDetailTab;
-                        if (!noteData) return null;
-                        
-                        const note = noteData.note || noteData;
-                        const user = noteData.user || note.user || {};
-                        const interactInfo = note.interactInfo || note.interact_info || {};
-                        const imageList = note.imageList || note.image_list || [];
-                        const video = note.video || {};
-                        
-                        let title = note.title || '';
-                        let desc = note.desc || '';
-                        
-                        let cover = '';
-                        if (imageList.length > 0) {
-                            cover = imageList[0].urlDefault || imageList[0].url_default || imageList[0].url || '';
-                        } else if (video.coverUrl || video.cover_url) {
-                            cover = video.coverUrl || video.cover_url;
-                        }
-                        
-                        let time = note.time || '';
-                        if (typeof time === 'number' && time > 0) {
-                            time = new Date(time).toLocaleDateString('zh-CN');
-                        }
-                        
-                        return {
-                            author: user.nickname || user.nickName || '',
-                            title: title,
-                            desc: desc,
-                            likeCount: interactInfo.likedCount || interactInfo.liked_count || 0,
-                            collectCount: interactInfo.collectedCount || interactInfo.collected_count || 0,
-                            commentCount: interactInfo.commentCount || interactInfo.comment_count || 0,
-                            cover: cover,
-                            time: time
-                        };
+            # 方法 2: 尝试从 __INITIAL_STATE__ 获取数据（在页面内先处理好，只返回简单对象）
+            note_info = page.evaluate("""
+                (noteId) => {
+                    const state = window.__INITIAL_STATE__;
+                    if (!state || !state.note) return null;
+                    
+                    const noteDetailMap = state.note.noteDetailMap || {};
+                    const detailEntry = noteDetailMap[noteId] || state.note;
+                    const note = detailEntry.note || detailEntry;
+                    const user = detailEntry.user || note.user || {};
+                    const interactInfo = note.interactInfo || note.interact_info || {};
+                    const imageList = note.imageList || note.image_list || [];
+                    const video = note.video || {};
+                    
+                    const title = note.title || '';
+                    const desc = note.desc || '';
+                    const author = user.nickname || user.nickName || '';
+                    const likeCount = interactInfo.likedCount || interactInfo.liked_count || 0;
+                    const collectCount = interactInfo.collectedCount || interactInfo.collected_count || 0;
+                    const commentCount = interactInfo.commentCount || interactInfo.comment_count || 0;
+                    
+                    let cover = '';
+                    if (imageList.length > 0) {
+                        const firstImg = imageList[0];
+                        cover = firstImg.urlDefault || firstImg.url_default || firstImg.url || '';
+                    } else if (video.coverUrl || video.cover_url) {
+                        cover = video.coverUrl || video.cover_url;
                     }
-                """)
-                
-                if legacy_note_info and any(legacy_note_info.get(field) for field in ("author", "title", "desc", "cover")):
-                    note_info = legacy_note_info
-
-            if note_info:
+                    
+                    let time = note.time || '';
+                    if (typeof time === 'number' && time > 0) {
+                        time = new Date(time).toLocaleDateString('zh-CN');
+                    }
+                    
+                    if (!title && !desc && !author && !cover) return null;
+                    
+                    return {
+                        author,
+                        title,
+                        desc,
+                        likeCount,
+                        collectCount,
+                        commentCount,
+                        cover,
+                        time
+                    };
+                }
+            """, note_id)
+            
+            if note_info and any(note_info.get(field) for field in ("author", "title", "desc", "cover")):
                 return {
                     "序号": 0,
                     "作者": clean_text(note_info.get("author", "")),
@@ -522,14 +526,25 @@ class XiaohongshuCrawler:
                             except:
                                 pass
                     
+                    # 检查是否已达到目标数量
+                    if len(notes) >= limit:
+                        logger.info(f"已达到目标数量 {limit}，停止爬取")
+                        break
+                    
                     # 滚动页面，加载更多笔记
                     logger.info("滚动页面加载更多...")
-                    page.evaluate("window.scrollBy(0, 800)")
-                    page.wait_for_timeout(3000)
+                    page.evaluate("window.scrollBy(0, 1000)")
+                    page.wait_for_timeout(2000)
                     cards = self._extract_note_cards(page)
                     if not cards:
                         cards = self._extract_note_cards_from_html(page.content())
+                    
+                    # 如果没有新笔记，停止爬取
+                    if not cards:
+                        logger.warning("没有更多笔记了")
+                        break
                 
+                logger.info(f"爬取完成，共获取 {len(notes)} 篇笔记")
                 browser.close()
                 return notes
                 
