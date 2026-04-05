@@ -255,24 +255,111 @@ class XiaohongshuCrawler:
     def _get_note_detail_from_page(self, page: Page, note_id: str) -> Optional[dict]:
         """从当前页面获取笔记详情"""
         try:
-            # 等待页面加载
-            page.wait_for_timeout(3000)
+            # 等待页面加载完成（等待 URL 包含 note_id）
+            try:
+                page.wait_for_url(f"*{note_id}*", timeout=5000)
+            except:
+                pass
+            
+            # 等待笔记内容加载
+            try:
+                page.wait_for_selector('[class*="note"], article', timeout=3000)
+            except:
+                pass
+            
+            page.wait_for_timeout(2000)
 
-            # 方法 1: 尝试从 DOM 元素直接提取（根据 F12 看到的结构）- 优先使用，避免序列化问题
+            # 方法 1: 从 __INITIAL_STATE__ 获取数据（最可靠，在页面内先处理好）
+            note_info = page.evaluate("""
+                (noteId) => {
+                    const state = window.__INITIAL_STATE__;
+                    if (!state || !state.note) return null;
+                    
+                    const noteDetailMap = state.note.noteDetailMap || {};
+                    // 优先使用 noteId 查找
+                    let detailEntry = noteDetailMap[noteId];
+                    
+                    // 如果找不到，尝试使用当前 noteId
+                    if (!detailEntry) {
+                        const currentId = Object.keys(noteDetailMap)[0];
+                        if (currentId) {
+                            detailEntry = noteDetailMap[currentId];
+                        }
+                    }
+                    
+                    if (!detailEntry) return null;
+                    
+                    const note = detailEntry.note || detailEntry;
+                    const user = detailEntry.user || note.user || {};
+                    const interactInfo = note.interactInfo || note.interact_info || {};
+                    const imageList = note.imageList || note.image_list || [];
+                    const video = note.video || {};
+                    
+                    const title = note.title || '';
+                    const desc = note.desc || '';
+                    const author = user.nickname || user.nickName || '';
+                    const likeCount = interactInfo.likedCount || interactInfo.liked_count || 0;
+                    const collectCount = interactInfo.collectedCount || interactInfo.collected_count || 0;
+                    const commentCount = interactInfo.commentCount || interactInfo.comment_count || 0;
+                    
+                    let cover = '';
+                    if (imageList && imageList.length > 0) {
+                        const firstImg = imageList[0];
+                        cover = firstImg.urlDefault || firstImg.url_default || firstImg.url || '';
+                    } else if (video.coverUrl || video.cover_url) {
+                        cover = video.coverUrl || video.cover_url;
+                    }
+                    
+                    let time = note.time || '';
+                    if (typeof time === 'number' && time > 0) {
+                        time = new Date(time).toLocaleDateString('zh-CN');
+                    }
+                    
+                    if (!title && !desc && !author && !cover) return null;
+                    
+                    return {
+                        author,
+                        title,
+                        desc,
+                        likeCount,
+                        collectCount,
+                        commentCount,
+                        cover,
+                        time
+                    };
+                }
+            """, note_id)
+            
+            if note_info and any(note_info.get(field) for field in ("author", "title", "desc", "cover")):
+                return {
+                    "序号": 0,
+                    "作者": clean_text(note_info.get("author", "")),
+                    "标题": clean_text(note_info.get("title", "")),
+                    "点赞数": format_number(str(note_info.get("likeCount", 0))),
+                    "收藏数": format_number(str(note_info.get("collectCount", 0))),
+                    "评论数": format_number(str(note_info.get("commentCount", 0))),
+                    "封面 URL": note_info.get("cover", ""),
+                    "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}",
+                    "正文内容": clean_text(note_info.get("desc", "")),
+                    "发布时间": str(note_info.get("time", "")),
+                    "状态": "成功",
+                }
+            
+            # 方法 2: 从 DOM 元素直接提取作为兜底
             dom_info = page.evaluate("""
                 () => {
-                    // 从 DOM 元素提取
-                    const titleEl = document.querySelector('#detail-title, .title, [class*="title"]');
-                    const descEl = document.querySelector('#detail-desc, .desc, [class*="desc"], .content');
-                    const authorEl = document.querySelector('.user-name, [class*="user-name"], [class*="username"], .nickname');
+                    // 使用更精确的选择器
+                    const titleEl = document.querySelector('h1#detail-title, h1.title, div[class*="title"]:first-of-type');
+                    const descEl = document.querySelector('#detail-desc, .desc, .content, [class*="desc"]');
+                    const authorEl = document.querySelector('[class*="user-name"], [class*="nickname"], .user-name');
                     
-                    // 获取点赞、收藏、评论数 - 使用更精确的选择器
-                    const likeEl = document.querySelector('[class*="like"] span.count, .interaction span.count');
-                    const collectEl = document.querySelector('[class*="collect"] span.count, .interaction span.count');
-                    const commentEl = document.querySelector('[class*="comment"] span.count, .interaction span.count');
+                    // 获取互动数据 - 使用更具体的属性选择器
+                    const likeEl = document.querySelector('[class*="like-count"] span, span.count:first-of-type');
+                    const collectEl = document.querySelectorAll('span.count')[1];
+                    const commentEl = document.querySelectorAll('span.count')[2];
                     
-                    // 获取封面图片
-                    const imgEl = document.querySelector('article img, .cover img, img[src*="http"], .image img');
+                    // 获取主图
+                    const imgEl = document.querySelector('article img:first-of-type, .cover img, img[src*="xiaohongshu"]');
                     
                     const getText = (el) => el ? el.textContent?.trim() || '' : '';
                     const getNumber = (el) => {
@@ -315,70 +402,6 @@ class XiaohongshuCrawler:
                     "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}",
                     "正文内容": clean_text(dom_info.get("desc", "")),
                     "发布时间": "",
-                    "状态": "成功",
-                }
-            
-            # 方法 2: 尝试从 __INITIAL_STATE__ 获取数据（在页面内先处理好，只返回简单对象）
-            note_info = page.evaluate("""
-                (noteId) => {
-                    const state = window.__INITIAL_STATE__;
-                    if (!state || !state.note) return null;
-                    
-                    const noteDetailMap = state.note.noteDetailMap || {};
-                    const detailEntry = noteDetailMap[noteId] || state.note;
-                    const note = detailEntry.note || detailEntry;
-                    const user = detailEntry.user || note.user || {};
-                    const interactInfo = note.interactInfo || note.interact_info || {};
-                    const imageList = note.imageList || note.image_list || [];
-                    const video = note.video || {};
-                    
-                    const title = note.title || '';
-                    const desc = note.desc || '';
-                    const author = user.nickname || user.nickName || '';
-                    const likeCount = interactInfo.likedCount || interactInfo.liked_count || 0;
-                    const collectCount = interactInfo.collectedCount || interactInfo.collected_count || 0;
-                    const commentCount = interactInfo.commentCount || interactInfo.comment_count || 0;
-                    
-                    let cover = '';
-                    if (imageList.length > 0) {
-                        const firstImg = imageList[0];
-                        cover = firstImg.urlDefault || firstImg.url_default || firstImg.url || '';
-                    } else if (video.coverUrl || video.cover_url) {
-                        cover = video.coverUrl || video.cover_url;
-                    }
-                    
-                    let time = note.time || '';
-                    if (typeof time === 'number' && time > 0) {
-                        time = new Date(time).toLocaleDateString('zh-CN');
-                    }
-                    
-                    if (!title && !desc && !author && !cover) return null;
-                    
-                    return {
-                        author,
-                        title,
-                        desc,
-                        likeCount,
-                        collectCount,
-                        commentCount,
-                        cover,
-                        time
-                    };
-                }
-            """, note_id)
-            
-            if note_info and any(note_info.get(field) for field in ("author", "title", "desc", "cover")):
-                return {
-                    "序号": 0,
-                    "作者": clean_text(note_info.get("author", "")),
-                    "标题": clean_text(note_info.get("title", "")),
-                    "点赞数": format_number(str(note_info.get("likeCount", 0))),
-                    "收藏数": format_number(str(note_info.get("collectCount", 0))),
-                    "评论数": format_number(str(note_info.get("commentCount", 0))),
-                    "封面 URL": note_info.get("cover", ""),
-                    "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}",
-                    "正文内容": clean_text(note_info.get("desc", "")),
-                    "发布时间": str(note_info.get("time", "")),
                     "状态": "成功",
                 }
             
