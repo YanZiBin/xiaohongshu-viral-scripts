@@ -1724,3 +1724,85 @@ playwright._impl._errors.TargetClosedError: Page.wait_for_timeout: Target page, 
     raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
 playwright._impl._errors.TargetClosedError: Page.evaluate: Target page, context or browser has been closed
 
+2026-04-05 13:42:17,587 - crawler - INFO - 开始爬取，关键词：黑丝, 数量：30
+2026-04-05 13:42:18,424 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝&source=web_explore_feed
+2026-04-05 13:42:24,657 - crawler - INFO - 提取初始笔记列表...
+2026-04-05 13:42:24,663 - crawler - INFO - 初始页面找到 28 篇笔记
+2026-04-05 13:42:24,664 - crawler - INFO - 爬取笔记 1/30: 69b23ef9000000002603f71d
+2026-04-05 13:42:37,292 - crawler - INFO - 成功获取笔记：浪莎才是御姐穿搭精髓... | 点赞：12000
+2026-04-05 13:42:39,305 - crawler - INFO - 爬取笔记 2/30: 693154d9000000001b026967
+2026-04-05 13:42:51,852 - crawler - INFO - 成功获取笔记：“拥有 绝对的错觉”... | 点赞：4887
+2026-04-05 13:42:53,861 - crawler - INFO - 爬取笔记 3/30: 69380d08000000001e0391f3
+2026-04-05 13:43:06,412 - crawler - INFO - 成功获取笔记：漂亮的医生姐姐我又来啦~... | 点赞：81
+2026-04-05 13:43:08,422 - crawler - INFO - 爬取笔记 4/30: 6971ef60000000001a037e90
+2026-04-05 13:43:21,053 - crawler - INFO - 成功获取笔记：属于我们女人的黑丝在哪里... | 点赞：896
+2026-04-05 13:43:23,069 - crawler - INFO - 爬取笔记 5/30: 69a2a520000000001d01051c
+2026-04-05 13:43:26,719 - crawler - ERROR - 爬取笔记 69a2a520000000001d01051c 失败：Page.wait_for_timeout: Target page, context or browser has been closed
+2026-04-05 13:43:26,721 - crawler - INFO - 爬取笔记 5/30: 6905b112000000000401087e
+2026-04-05 13:43:26,723 - crawler - ERROR - 爬取笔记 6905b112000000000401087e 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,724 - crawler - INFO - 爬取笔记 5/30: 6918a9b80000000004007d5b
+2026-04-05 13:43:26,726 - crawler - ERROR - 爬取笔记 6918a9b80000000004007d5b 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,727 - crawler - INFO - 爬取笔记 5/30: 671c65da0000000021006aef
+2026-04-05 13:43:26,729 - crawler - ERROR - 爬取笔记 671c65da0000000021006aef 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,731 - crawler - INFO - 爬取笔记 5/30: 69a514a8000000002202da25
+2026-04-05 13:43:26,733 - crawler - ERROR - 爬取笔记 69a514a8000000002202da25 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,734 - crawler - INFO - 爬取笔记 5/30: 6872392d000000002201e0ea
+2026-04-05 13:43:26,736 - crawler - ERROR - 爬取笔记 6872392d000000002201e0ea 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,738 - crawler - INFO - 爬取笔记 5/30: 69ad2dde000000000d00ba2e
+2026-04-05 13:43:26,739 - crawler - ERROR - 爬取笔记 69ad2dde000000000d00ba2e 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,741 - crawler - INFO - 爬取笔记 5/30: 695d5962000000001a02b7ed
+2026-04-05 13:43:26,742 - crawler - ERROR - 爬取笔记 695d5962000000001a02b7ed 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,744 - crawler - INFO - 爬取笔记 5/30: 6935aead0000000019026a3d
+2026-04-05 13:43:26,745 - crawler - ERROR - 爬取笔记 6935aead0000000019026a3d 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,746 - crawler - INFO - 爬取笔记 5/30: 692e65bd000000001e038de9
+2026-04-05 13:43:26,748 - crawler - ERROR - 爬取笔记 692e65bd000000001e038de9 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,750 - crawler - INFO - 爬取笔记 5/30: 6913fa7600000000050138f1
+2026-04-05 13:43:26,751 - crawler - ERROR - 爬取笔记 6913fa7600000000050138f1 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,753 - crawler - INFO - 爬取笔记 5/30: 6959cb7b000000001e00fb9b
+2026-04-05 13:43:26,754 - crawler - ERROR - 爬取笔记 6959cb7b000000001e00fb9b 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,757 - crawler - INFO - 爬取笔记 5/30: 69a2c4b7000000001a02c79b
+2026-04-05 13:43:26,758 - crawler - ERROR - 爬取笔记 69a2c4b7000000001a02c79b 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,762 - crawler - INFO - 爬取笔记 5/30: 68c0454e000000001c00a045
+2026-04-05 13:43:26,765 - crawler - ERROR - 爬取笔记 68c0454e000000001c00a045 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,767 - crawler - INFO - 爬取笔记 5/30: 69bd6f54000000001a028fd8
+2026-04-05 13:43:26,769 - crawler - ERROR - 爬取笔记 69bd6f54000000001a028fd8 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,771 - crawler - INFO - 爬取笔记 5/30: 681381a80000000022004cc5
+2026-04-05 13:43:26,773 - crawler - ERROR - 爬取笔记 681381a80000000022004cc5 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,774 - crawler - INFO - 爬取笔记 5/30: 699bb01200000000150221c6
+2026-04-05 13:43:26,776 - crawler - ERROR - 爬取笔记 699bb01200000000150221c6 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,777 - crawler - INFO - 爬取笔记 5/30: 696fafef000000000d00be23
+2026-04-05 13:43:26,779 - crawler - ERROR - 爬取笔记 696fafef000000000d00be23 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,781 - crawler - INFO - 爬取笔记 5/30: 693fae18000000001f00896f
+2026-04-05 13:43:26,782 - crawler - ERROR - 爬取笔记 693fae18000000001f00896f 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,784 - crawler - INFO - 爬取笔记 5/30: 69c2c033000000001a0221d1
+2026-04-05 13:43:26,786 - crawler - ERROR - 爬取笔记 69c2c033000000001a0221d1 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,787 - crawler - INFO - 爬取笔记 5/30: 69cd08de000000001f003ab0
+2026-04-05 13:43:26,789 - crawler - ERROR - 爬取笔记 69cd08de000000001f003ab0 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,790 - crawler - INFO - 爬取笔记 5/30: 69b605f6000000001d018709
+2026-04-05 13:43:26,792 - crawler - ERROR - 爬取笔记 69b605f6000000001d018709 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,793 - crawler - INFO - 爬取笔记 5/30: 68fb49420000000004017981
+2026-04-05 13:43:26,794 - crawler - ERROR - 爬取笔记 68fb49420000000004017981 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,796 - crawler - INFO - 爬取笔记 5/30: 69becca6000000001a027b54
+2026-04-05 13:43:26,798 - crawler - ERROR - 爬取笔记 69becca6000000001a027b54 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:26,803 - crawler - INFO - 滚动页面加载更多...
+2026-04-05 13:43:27,282 - crawler - ERROR - 爬取失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 13:43:27,284 - crawler - ERROR - Traceback (most recent call last):
+  File "E:\Yan.doument2\programming exercises\python\小红书爆款脚本\crawler.py", line 543, in crawl
+    page.evaluate("window.scrollBy(0, 1000)")
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\sync_api\_generated.py", line 8566, in evaluate
+    self._sync(
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_page.py", line 464, in evaluate
+    return await self._main_frame.evaluate(expression, arg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_frame.py", line 320, in evaluate
+    await self._channel.send(
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Page.evaluate: Target page, context or browser has been closed
+

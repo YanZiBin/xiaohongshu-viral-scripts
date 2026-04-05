@@ -58,20 +58,25 @@ class XiaohongshuCrawler:
         return browser, context
 
     def _click_filter(self, page: Page):
-        """点击筛选按钮，选择'一周内'"""
+        """鼠标移动到筛选按钮，然后点击'一周内'"""
         try:
-            # 点击筛选按钮
-            filter_btn = page.locator('button:has-text("筛选"), div:has-text("筛选"), span:has-text("筛选")').first
+            # 找到筛选按钮
+            filter_btn = page.locator('div.filter, [class*="filter"]:has-text("筛选"), span:has-text("筛选")').first
             if filter_btn.is_visible():
-                filter_btn.click()
+                # 鼠标悬停（会弹出选项）
+                filter_btn.hover()
                 page.wait_for_timeout(1000)
                 
                 # 点击"一周内"
-                one_week_btn = page.locator('button:has-text("一周内"), div:has-text("一周内"), span:has-text("一周内")').first
+                one_week_btn = page.locator('div.tags:has-text("一周内"), button:has-text("一周内"), span:has-text("一周内")').first
                 if one_week_btn.is_visible():
                     one_week_btn.click()
                     page.wait_for_timeout(2000)
                     logger.info("已筛选'一周内'")
+                else:
+                    logger.warning("未找到'一周内'选项")
+            else:
+                logger.warning("未找到筛选按钮")
         except Exception as e:
             logger.warning(f"筛选失败：{e}")
 
