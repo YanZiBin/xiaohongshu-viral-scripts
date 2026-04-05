@@ -413,10 +413,25 @@ class XiaohongshuCrawler:
                 
                 # 开始爬取笔记
                 crawled_ids = set()
+                failed_ids = set()  # 记录失败的 ID
+                consecutive_failures = 0  # 连续失败次数
+                max_consecutive_failures = 10  # 最大连续失败次数
+                scroll_count = 0  # 滚动次数
+                max_scroll_count = 20  # 最大滚动次数
                 
                 while len(notes) < limit:
                     if not cards:
                         logger.warning("没有找到更多笔记")
+                        break
+                    
+                    # 检查连续失败次数
+                    if consecutive_failures >= max_consecutive_failures:
+                        logger.warning(f"连续失败 {consecutive_failures} 次，停止爬取")
+                        break
+                    
+                    # 检查滚动次数
+                    if scroll_count >= max_scroll_count:
+                        logger.warning(f"已达到最大滚动次数 {max_scroll_count}，停止爬取")
                         break
                     
                     # 逐个点击笔记
@@ -425,6 +440,12 @@ class XiaohongshuCrawler:
                             break
                         
                         if card['id'] in crawled_ids:
+                            continue
+                        
+                        # 如果这个 ID 已经失败过 3 次，跳过
+                        if failed_ids.count(card['id']) >= 3:
+                            logger.info(f"ID {card['id']} 已失败 3 次，跳过")
+                            crawled_ids.add(card['id'])
                             continue
                         
                         logger.info(f"爬取笔记 {len(notes)+1}/{limit}: {card['id']}")
@@ -442,6 +463,8 @@ class XiaohongshuCrawler:
                                 card_element.click()
                             else:
                                 logger.warning(f"找不到笔记元素：{card['id']}")
+                                failed_ids.add(card['id'])
+                                consecutive_failures += 1
                                 crawled_ids.add(card['id'])
                                 continue
                             
@@ -454,22 +477,12 @@ class XiaohongshuCrawler:
                                 detail["序号"] = len(notes) + 1
                                 notes.append(detail)
                                 crawled_ids.add(card['id'])
-                                logger.info(f"成功获取笔记：{detail['标题'][:20] if detail['标题'] else '无标题'}...")
+                                consecutive_failures = 0  # 重置连续失败计数
+                                logger.info(f"成功获取笔记：{detail['标题'][:20] if detail['标题'] else '无标题'}... | 点赞：{detail['点赞数']}")
                             else:
                                 logger.warning(f"无法获取笔记详情：{card['id']}")
-                                notes.append({
-                                    "序号": len(notes) + 1,
-                                    "作者": "",
-                                    "标题": "",
-                                    "点赞数": 0,
-                                    "收藏数": 0,
-                                    "评论数": 0,
-                                    "封面 URL": "",
-                                    "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{card['id']}",
-                                    "正文内容": "",
-                                    "发布时间": "",
-                                    "状态": "无法访问",
-                                })
+                                failed_ids.add(card['id'])
+                                consecutive_failures += 1
                                 crawled_ids.add(card['id'])
                             
                             # 返回搜索结果页
@@ -477,6 +490,8 @@ class XiaohongshuCrawler:
                             page.wait_for_timeout(2000)
                             
                         except Exception as e:
+                            failed_ids.add(card['id'])
+                            consecutive_failures += 1
                             crawled_ids.add(card['id'])
                             logger.error(f"爬取笔记 {card['id']} 失败：{e}")
                             try:
@@ -494,6 +509,8 @@ class XiaohongshuCrawler:
                     logger.info("滚动页面加载更多...")
                     page.evaluate("window.scrollBy(0, 1000)")
                     page.wait_for_timeout(2000)
+                    scroll_count += 1
+                    
                     cards = self._extract_note_cards(page)
                     if not cards:
                         cards = self._extract_note_cards_from_html(page.content())
@@ -502,6 +519,11 @@ class XiaohongshuCrawler:
                     if not cards:
                         logger.warning("没有更多笔记了")
                         break
+                    
+                    # 检查是否还有未爬取的笔记
+                    remaining_cards = [c for c in cards if c['id'] not in crawled_ids]
+                    if not remaining_cards:
+                        logger.info("当前页面没有更多未爬取的笔记")
                 
                 logger.info(f"爬取完成，共获取 {len(notes)} 篇笔记")
                 browser.close()
