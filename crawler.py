@@ -311,6 +311,14 @@ class XiaohongshuCrawler:
                     
                     const getNumber = (el) => {
                         const text = getText(el);
+                        // 处理带"万"的数字，如 "1.2 万" = 12000
+                        if (text.includes('万')) {
+                            const wanMatch = text.match(/([\\d.]+)\\s*万/);
+                            if (wanMatch) {
+                                return Math.round(parseFloat(wanMatch[1]) * 10000);
+                            }
+                        }
+                        // 处理普通数字，去除逗号
                         const num = text.match(/[\\d,]+/);
                         return num ? parseInt(num[0].replace(/,/g, '')) : 0;
                     };
