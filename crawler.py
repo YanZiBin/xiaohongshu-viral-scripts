@@ -490,6 +490,11 @@ class XiaohongshuCrawler:
                             
                             page.wait_for_timeout(3000)
                             
+                            # 设置详情页缩放为 100%
+                            page.evaluate("document.body.style.zoom = '1'")
+                            page.evaluate("document.documentElement.style.zoom = '1'")
+                            page.wait_for_timeout(500)
+                            
                             # 获取详情
                             detail = self._get_note_detail_from_page(page, card['id'])
                             

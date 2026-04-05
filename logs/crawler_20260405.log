@@ -1561,3 +1561,84 @@ Call log:
     raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
 playwright._impl._errors.TargetClosedError: Page.evaluate: Target page, context or browser has been closed
 
+2026-04-05 13:27:09,989 - crawler - INFO - 开始爬取，关键词：黑丝, 数量：30
+2026-04-05 13:27:10,805 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝&source=web_explore_feed
+2026-04-05 13:27:16,993 - crawler - INFO - 提取初始笔记列表...
+2026-04-05 13:27:16,998 - crawler - INFO - 初始页面找到 28 篇笔记
+2026-04-05 13:27:16,999 - crawler - INFO - 爬取笔记 1/30: 69b23ef9000000002603f71d
+2026-04-05 13:27:29,100 - crawler - INFO - 成功获取笔记：浪莎才是御姐穿搭精髓... | 点赞：1
+2026-04-05 13:27:31,124 - crawler - INFO - 爬取笔记 2/30: 69a2a520000000001d01051c
+2026-04-05 13:27:43,164 - crawler - INFO - 成功获取笔记：这条高级感马油袜让我直接焊在腿上... | 点赞：159
+2026-04-05 13:27:45,186 - crawler - INFO - 爬取笔记 3/30: 69380d08000000001e0391f3
+2026-04-05 13:27:57,194 - crawler - INFO - 成功获取笔记：漂亮的医生姐姐我又来啦~... | 点赞：81
+2026-04-05 13:27:59,223 - crawler - INFO - 爬取笔记 4/30: 6971ef60000000001a037e90
+2026-04-05 13:28:11,263 - crawler - INFO - 成功获取笔记：属于我们女人的黑丝在哪里... | 点赞：896
+2026-04-05 13:28:13,273 - crawler - INFO - 爬取笔记 5/30: 6905b112000000000401087e
+2026-04-05 13:28:25,283 - crawler - INFO - 成功获取笔记：有时候爱情比金钱更重要！... | 点赞：118
+2026-04-05 13:28:27,296 - crawler - INFO - 爬取笔记 6/30: 69a514a8000000002202da25
+2026-04-05 13:28:39,335 - crawler - INFO - 成功获取笔记：御姐穿搭... | 点赞：1339
+2026-04-05 13:28:41,354 - crawler - INFO - 爬取笔记 7/30: 695d5962000000001a02b7ed
+2026-04-05 13:28:53,417 - crawler - INFO - 成功获取笔记：御是一种感觉 ｡𖦹°‧... | 点赞：1405
+2026-04-05 13:28:55,433 - crawler - INFO - 爬取笔记 8/30: 671c65da0000000021006aef
+2026-04-05 13:29:07,473 - crawler - INFO - 成功获取笔记：舍友吐槽：不就是见男友至于买这么多黑丝吗... | 点赞：363
+2026-04-05 13:29:09,495 - crawler - INFO - 爬取笔记 9/30: 6918a9b80000000004007d5b
+2026-04-05 13:29:24,500 - crawler - INFO - 成功获取笔记：无标题... | 点赞：110
+2026-04-05 13:29:26,509 - crawler - INFO - 爬取笔记 10/30: 69becca6000000001a027b54
+2026-04-05 13:29:38,561 - crawler - INFO - 成功获取笔记：丝袜➕包臀裙=斩男？... | 点赞：341
+2026-04-05 13:29:40,575 - crawler - INFO - 爬取笔记 11/30: 6913fa7600000000050138f1
+2026-04-05 13:29:52,588 - crawler - INFO - 成功获取笔记：我就是你的解药⋆⁺₊✧ 🖤ྀིྀི... | 点赞：1
+2026-04-05 13:29:54,603 - crawler - INFO - 爬取笔记 12/30: 69ad2dde000000000d00ba2e
+2026-04-05 13:30:09,580 - crawler - INFO - 成功获取笔记：无标题... | 点赞：31
+2026-04-05 13:30:11,604 - crawler - INFO - 爬取笔记 13/30: 693154d9000000001b026967
+2026-04-05 13:30:23,604 - crawler - INFO - 成功获取笔记：“拥有 绝对的错觉”... | 点赞：4887
+2026-04-05 13:30:25,615 - crawler - INFO - 爬取笔记 14/30: 6872392d000000002201e0ea
+2026-04-05 13:30:37,622 - crawler - INFO - 成功获取笔记：俗日困我... | 点赞：1959
+2026-04-05 13:30:39,633 - crawler - INFO - 爬取笔记 15/30: 69a2c4b7000000001a02c79b
+2026-04-05 13:30:51,633 - crawler - INFO - 成功获取笔记：报告！本严肃跑者今日有氧9公里... | 点赞：1
+2026-04-05 13:30:53,653 - crawler - INFO - 爬取笔记 16/30: 6935aead0000000019026a3d
+2026-04-05 13:31:05,694 - crawler - INFO - 成功获取笔记：🍶与妻酒を飲む... | 点赞：508
+2026-04-05 13:31:07,714 - crawler - INFO - 爬取笔记 17/30: 6959cb7b000000001e00fb9b
+2026-04-05 13:31:19,742 - crawler - INFO - 成功获取笔记：🖤... | 点赞：3811
+2026-04-05 13:31:21,758 - crawler - INFO - 爬取笔记 18/30: 68c0454e000000001c00a045
+2026-04-05 13:31:33,770 - crawler - INFO - 成功获取笔记：欧美电视购物 挑鞋... | 点赞：4861
+2026-04-05 13:31:35,780 - crawler - INFO - 爬取笔记 19/30: 69bd6f54000000001a028fd8
+2026-04-05 13:31:47,786 - crawler - INFO - 成功获取笔记：今日穿搭推荐词：黑长直... | 点赞：330
+2026-04-05 13:31:49,796 - crawler - INFO - 爬取笔记 20/30: 692e65bd000000001e038de9
+2026-04-05 13:32:01,826 - crawler - INFO - 成功获取笔记：不懂厚黑的有难了... | 点赞：939
+2026-04-05 13:32:03,847 - crawler - INFO - 爬取笔记 21/30: 6930e9c5000000001e037d81
+2026-04-05 13:32:15,845 - crawler - INFO - 成功获取笔记：围着我转就好了 你哪有那么多自己的事要做... | 点赞：1678
+2026-04-05 13:32:17,867 - crawler - INFO - 爬取笔记 22/30: 696fafef000000000d00be23
+2026-04-05 13:32:29,877 - crawler - INFO - 成功获取笔记：厚黑你懂吗... | 点赞：1169
+2026-04-05 13:32:31,890 - crawler - INFO - 爬取笔记 23/30: 681381a80000000022004cc5
+2026-04-05 13:32:46,927 - crawler - INFO - 成功获取笔记：无标题... | 点赞：430
+2026-04-05 13:32:48,949 - crawler - INFO - 爬取笔记 24/30: 69d078d7000000001a0329fa
+2026-04-05 13:33:06,958 - crawler - WARNING - 无法获取笔记详情：69d078d7000000001a0329fa
+2026-04-05 13:33:08,980 - crawler - INFO - 爬取笔记 24/30: 6924415e000000000d034a90
+2026-04-05 13:33:10,032 - crawler - WARNING - 找不到笔记元素：6924415e000000000d034a90
+2026-04-05 13:33:10,032 - crawler - INFO - 爬取笔记 24/30: 69c2c033000000001a0221d1
+2026-04-05 13:33:11,079 - crawler - WARNING - 找不到笔记元素：69c2c033000000001a0221d1
+2026-04-05 13:33:11,080 - crawler - INFO - 爬取笔记 24/30: 69cd08de000000001f003ab0
+2026-04-05 13:33:12,120 - crawler - WARNING - 找不到笔记元素：69cd08de000000001f003ab0
+2026-04-05 13:33:12,120 - crawler - INFO - 爬取笔记 24/30: 693fae18000000001f00896f
+2026-04-05 13:33:13,152 - crawler - WARNING - 找不到笔记元素：693fae18000000001f00896f
+2026-04-05 13:33:13,152 - crawler - INFO - 滚动页面加载更多...
+2026-04-05 13:33:13,853 - crawler - ERROR - 爬取失败：Page.wait_for_timeout: Target page, context or browser has been closed
+2026-04-05 13:33:13,854 - crawler - ERROR - Traceback (most recent call last):
+  File "E:\Yan.doument2\programming exercises\python\小红书爆款脚本\crawler.py", line 531, in crawl
+    page.wait_for_timeout(2000)
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\sync_api\_generated.py", line 11536, in wait_for_timeout
+    self._sync(self._impl_obj.wait_for_timeout(timeout=timeout))
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_page.py", line 1101, in wait_for_timeout
+    await self._main_frame.wait_for_timeout(timeout)
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_frame.py", line 862, in wait_for_timeout
+    await self._channel.send("waitForTimeout", None, {"waitTimeout": timeout})
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Page.wait_for_timeout: Target page, context or browser has been closed
+
