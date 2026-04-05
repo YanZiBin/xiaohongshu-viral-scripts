@@ -38,11 +38,13 @@ class XiaohongshuCrawler:
                 '--disable-blink-features=AutomationControlled',
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
+                '--force-device-scale-factor=1',  # 强制 100% 缩放
             ]
         )
         context = browser.new_context(
             user_agent=self.headers["User-Agent"],
             viewport={"width": 1920, "height": 1080},
+            device_scale_factor=1,  # 设备缩放因子设为 1
         )
         
         # 设置 Cookie
@@ -385,11 +387,17 @@ class XiaohongshuCrawler:
                 browser, context = self._setup_browser(p)
                 page = context.new_page()
                 
+                # 设置页面缩放为 100%
+                page.evaluate("document.body.style.zoom = '1'")
+                
                 # 访问搜索页面
                 url = f"{CRAWLER_CONFIG['BASE_URL']}/search_result?keyword={keyword}&source=web_explore_feed"
                 logger.info(f"访问搜索页面：{url}")
                 page.goto(url, timeout=60000)
                 page.wait_for_timeout(5000)
+                
+                # 设置页面缩放为 100%
+                page.evaluate("document.documentElement.style.zoom = '1'")
                 
                 # 先提取一次笔记（不筛选）
                 logger.info("提取初始笔记列表...")
