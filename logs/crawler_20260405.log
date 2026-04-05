@@ -1890,3 +1890,152 @@ playwright._impl._errors.TargetClosedError: Page.evaluate: Target page, context 
     raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
 playwright._impl._errors.TargetClosedError: Page.evaluate: Target page, context or browser has been closed
 
+2026-04-05 21:11:35,293 - crawler - INFO - 开始爬取，关键词：黑丝, 数量：30
+2026-04-05 21:11:48,408 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝&source=web_explore_feed
+2026-04-05 21:12:04,326 - crawler - INFO - 提取笔记列表...
+2026-04-05 21:12:04,342 - crawler - INFO - 找到 28 篇笔记
+2026-04-05 21:12:04,342 - crawler - INFO - 爬取笔记 1/30: 69ca11f70000000023022c59
+2026-04-05 21:12:22,895 - crawler - WARNING - 无法获取笔记详情：69ca11f70000000023022c59
+2026-04-05 21:12:24,908 - crawler - INFO - 爬取笔记 1/30: 69cfcf8d000000001f00390c
+2026-04-05 21:12:25,950 - crawler - WARNING - 找不到笔记元素：69cfcf8d000000001f00390c
+2026-04-05 21:12:25,950 - crawler - INFO - 爬取笔记 1/30: 69cfc21d00000000210103c8
+2026-04-05 21:12:26,982 - crawler - WARNING - 找不到笔记元素：69cfc21d00000000210103c8
+2026-04-05 21:12:26,982 - crawler - INFO - 爬取笔记 1/30: 69cfd96f000000002003a92e
+2026-04-05 21:12:28,018 - crawler - WARNING - 找不到笔记元素：69cfd96f000000002003a92e
+2026-04-05 21:12:28,019 - crawler - INFO - 爬取笔记 1/30: 69c9c4d30000000023004f3b
+2026-04-05 21:12:29,054 - crawler - WARNING - 找不到笔记元素：69c9c4d30000000023004f3b
+2026-04-05 21:12:29,054 - crawler - INFO - 爬取笔记 1/30: 69d1ee440000000023017d25
+2026-04-05 21:12:30,078 - crawler - WARNING - 找不到笔记元素：69d1ee440000000023017d25
+2026-04-05 21:12:30,078 - crawler - INFO - 爬取笔记 1/30: 69cbb049000000001a036ef0
+2026-04-05 21:12:31,114 - crawler - WARNING - 找不到笔记元素：69cbb049000000001a036ef0
+2026-04-05 21:12:31,114 - crawler - INFO - 爬取笔记 1/30: 69cf887d000000002800b153
+2026-04-05 21:12:32,150 - crawler - WARNING - 找不到笔记元素：69cf887d000000002800b153
+2026-04-05 21:12:32,150 - crawler - INFO - 爬取笔记 1/30: 69d17fdd0000000023005a28
+2026-04-05 21:12:33,191 - crawler - WARNING - 找不到笔记元素：69d17fdd0000000023005a28
+2026-04-05 21:12:33,191 - crawler - INFO - 爬取笔记 1/30: 69cfe74e0000000022026379
+2026-04-05 21:12:33,515 - crawler - ERROR - 爬取笔记 69cfe74e0000000022026379 失败：Page.wait_for_timeout: Target page, context or browser has been closed
+2026-04-05 21:12:33,517 - crawler - INFO - 爬取笔记 1/30: 69cbbfd6000000001b0031a4
+2026-04-05 21:12:33,520 - crawler - ERROR - 爬取笔记 69cbbfd6000000001b0031a4 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,522 - crawler - INFO - 爬取笔记 1/30: 69cc75e30000000023022b88
+2026-04-05 21:12:33,524 - crawler - ERROR - 爬取笔记 69cc75e30000000023022b88 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,526 - crawler - INFO - 爬取笔记 1/30: 69c9e3650000000023024e2a
+2026-04-05 21:12:33,529 - crawler - ERROR - 爬取笔记 69c9e3650000000023024e2a 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,531 - crawler - INFO - 爬取笔记 1/30: 69ccab48000000001a026603
+2026-04-05 21:12:33,534 - crawler - ERROR - 爬取笔记 69ccab48000000001a026603 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,537 - crawler - INFO - 爬取笔记 1/30: 69ca635c000000001a02ab6e
+2026-04-05 21:12:33,539 - crawler - ERROR - 爬取笔记 69ca635c000000001a02ab6e 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,541 - crawler - INFO - 爬取笔记 1/30: 69cf7a1d000000001a0309d5
+2026-04-05 21:12:33,543 - crawler - ERROR - 爬取笔记 69cf7a1d000000001a0309d5 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,545 - crawler - INFO - 爬取笔记 1/30: 69cdd873000000002102fc8c
+2026-04-05 21:12:33,547 - crawler - ERROR - 爬取笔记 69cdd873000000002102fc8c 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,549 - crawler - INFO - 爬取笔记 1/30: 69ce90890000000022001cfa
+2026-04-05 21:12:33,551 - crawler - ERROR - 爬取笔记 69ce90890000000022001cfa 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,554 - crawler - INFO - 爬取笔记 1/30: 69cfe101000000002301e8a7
+2026-04-05 21:12:33,560 - crawler - ERROR - 爬取笔记 69cfe101000000002301e8a7 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,561 - crawler - INFO - 爬取笔记 1/30: 69ce61ba000000002202823b
+2026-04-05 21:12:33,562 - crawler - ERROR - 爬取笔记 69ce61ba000000002202823b 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,564 - crawler - INFO - 爬取笔记 1/30: 69cfbfa9000000001f002277
+2026-04-05 21:12:33,566 - crawler - ERROR - 爬取笔记 69cfbfa9000000001f002277 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,567 - crawler - INFO - 爬取笔记 1/30: 69ce8cf70000000022028e60
+2026-04-05 21:12:33,569 - crawler - ERROR - 爬取笔记 69ce8cf70000000022028e60 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,571 - crawler - INFO - 爬取笔记 1/30: 69cc94ae000000002302123b
+2026-04-05 21:12:33,573 - crawler - ERROR - 爬取笔记 69cc94ae000000002302123b 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,574 - crawler - INFO - 爬取笔记 1/30: 69cbb8b40000000022026141
+2026-04-05 21:12:33,576 - crawler - ERROR - 爬取笔记 69cbb8b40000000022026141 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,577 - crawler - INFO - 爬取笔记 1/30: 69c957b6000000001b020caf
+2026-04-05 21:12:33,579 - crawler - ERROR - 爬取笔记 69c957b6000000001b020caf 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,580 - crawler - INFO - 爬取笔记 1/30: 69d0cc9c000000002202a2fe
+2026-04-05 21:12:33,582 - crawler - ERROR - 爬取笔记 69d0cc9c000000002202a2fe 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,583 - crawler - INFO - 爬取笔记 1/30: 69ca449f0000000021013983
+2026-04-05 21:12:33,585 - crawler - ERROR - 爬取笔记 69ca449f0000000021013983 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,587 - crawler - INFO - 爬取笔记 1/30: 69d1e9e4000000001a0326ac
+2026-04-05 21:12:33,588 - crawler - ERROR - 爬取笔记 69d1e9e4000000001a0326ac 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,590 - crawler - INFO - 滚动页面加载更多...
+2026-04-05 21:12:33,892 - crawler - ERROR - 爬取失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 21:12:33,893 - crawler - ERROR - Traceback (most recent call last):
+  File "E:\Yan.doument2\programming exercises\python\小红书爆款脚本\crawler.py", line 530, in crawl
+    page.evaluate("window.scrollBy(0, 1000)")
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\sync_api\_generated.py", line 8566, in evaluate
+    self._sync(
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_page.py", line 464, in evaluate
+    return await self._main_frame.evaluate(expression, arg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_frame.py", line 320, in evaluate
+    await self._channel.send(
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Page.evaluate: Target page, context or browser has been closed
+
+2026-04-05 21:12:51,104 - crawler - INFO - 开始爬取，关键词：黑丝, 数量：30
+2026-04-05 21:12:52,095 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝&source=web_explore_feed
+2026-04-05 21:13:03,598 - crawler - INFO - 提取笔记列表...
+2026-04-05 21:13:03,610 - crawler - INFO - 找到 28 篇笔记
+2026-04-05 21:13:03,610 - crawler - INFO - 爬取笔记 1/30: 69ca11f70000000023022c59
+2026-04-05 21:13:16,107 - crawler - INFO - 成功获取笔记：All black🖤... | 点赞：1734
+2026-04-05 21:13:18,117 - crawler - INFO - 爬取笔记 2/30: 69cf887d000000002800b153
+2026-04-05 21:13:30,791 - crawler - INFO - 成功获取笔记：空姐乘务员女骑手，东航漫画比较给力画风... | 点赞：3
+2026-04-05 21:13:32,805 - crawler - INFO - 爬取笔记 3/30: 69ccd9cc000000001a021c9b
+2026-04-05 21:13:45,433 - crawler - INFO - 成功获取笔记：兔女郎穿搭杀疯了！甜辣御姐感直接拉满✨... | 点赞：43
+2026-04-05 21:13:47,454 - crawler - INFO - 爬取笔记 4/30: 69cfcf8d000000001f00390c
+2026-04-05 21:14:03,006 - crawler - INFO - 成功获取笔记：无标题... | 点赞：20
+2026-04-05 21:14:05,030 - crawler - INFO - 爬取笔记 5/30: 69cbb049000000001a036ef0
+2026-04-05 21:14:20,544 - crawler - INFO - 成功获取笔记：无标题... | 点赞：126
+2026-04-05 21:14:22,562 - crawler - INFO - 爬取笔记 6/30: 69cfc21d00000000210103c8
+2026-04-05 21:14:35,105 - crawler - INFO - 成功获取笔记：迪丽热巴黑丝杀疯了！171大长腿直接封神... | 点赞：19
+2026-04-05 21:14:37,116 - crawler - INFO - 爬取笔记 7/30: 69cfe74e0000000022026379
+2026-04-05 21:14:49,660 - crawler - INFO - 成功获取笔记：🖤ྀིྀི... | 点赞：69
+2026-04-05 21:14:51,683 - crawler - INFO - 爬取笔记 8/30: 69d1ee440000000023017d25
+2026-04-05 21:15:07,265 - crawler - INFO - 成功获取笔记：无标题... | 点赞：1
+2026-04-05 21:15:09,277 - crawler - INFO - 爬取笔记 9/30: 69cfdb9b000000001f006ebd
+2026-04-05 21:15:21,789 - crawler - INFO - 成功获取笔记：氛围感拉满... | 点赞：552
+2026-04-05 21:15:23,799 - crawler - INFO - 爬取笔记 10/30: 69cfd96f000000002003a92e
+2026-04-05 21:15:36,320 - crawler - INFO - 成功获取笔记：今天是御姐风～... | 点赞：1215
+2026-04-05 21:15:38,340 - crawler - INFO - 爬取笔记 11/30: 69ce90890000000022001cfa
+2026-04-05 21:15:50,893 - crawler - INFO - 成功获取笔记：宅家的快乐：黑丝+猫咪，双倍满足✨... | 点赞：104
+2026-04-05 21:15:52,909 - crawler - INFO - 爬取笔记 12/30: 69cc94ae000000002302123b
+2026-04-05 21:16:05,441 - crawler - INFO - 成功获取笔记：春夏丝袜穿搭灵感Look*3... | 点赞：662
+2026-04-05 21:16:07,459 - crawler - INFO - 爬取笔记 13/30: 69c9e3650000000023024e2a
+2026-04-05 21:16:23,067 - crawler - INFO - 成功获取笔记：无标题... | 点赞：478
+2026-04-05 21:16:25,085 - crawler - INFO - 爬取笔记 14/30: 69cc75e30000000023022b88
+2026-04-05 21:16:40,623 - crawler - INFO - 成功获取笔记：无标题... | 点赞：621
+2026-04-05 21:16:42,638 - crawler - INFO - 爬取笔记 15/30: 69d17fdd0000000023005a28
+2026-04-05 21:16:55,433 - crawler - INFO - 成功获取笔记：男人穿黑丝简直...【不死途】... | 点赞：17000
+2026-04-05 21:16:57,458 - crawler - INFO - 爬取笔记 16/30: 69cfe101000000002301e8a7
+2026-04-05 21:17:10,050 - crawler - INFO - 成功获取笔记：还真是什么姿势都会👉🏻... | 点赞：448
+2026-04-05 21:17:12,065 - crawler - INFO - 爬取笔记 17/30: 69ccab48000000001a026603
+2026-04-05 21:17:27,587 - crawler - INFO - 成功获取笔记：无标题... | 点赞：809
+2026-04-05 21:17:29,606 - crawler - INFO - 爬取笔记 18/30: 69cbbfd6000000001b0031a4
+2026-04-05 21:17:42,188 - crawler - INFO - 成功获取笔记：又是一年樱花季🌸... | 点赞：669
+2026-04-05 21:17:44,201 - crawler - INFO - 爬取笔记 19/30: 69cf7a1d000000001a0309d5
+2026-04-05 21:17:56,731 - crawler - INFO - 成功获取笔记：匡威和咖啡小屋... | 点赞：358
+2026-04-05 21:17:58,748 - crawler - INFO - 爬取笔记 20/30: 69cdd873000000002102fc8c
+2026-04-05 21:18:14,306 - crawler - INFO - 成功获取笔记：无标题... | 点赞：571
+2026-04-05 21:18:16,323 - crawler - INFO - 爬取笔记 21/30: 69ce61ba000000002202823b
+2026-04-05 21:18:28,867 - crawler - INFO - 成功获取笔记：黑丝真的显瘦... | 点赞：123
+2026-04-05 21:18:30,893 - crawler - INFO - 爬取笔记 22/30: 69ce8cf70000000022028e60
+2026-04-05 21:18:43,454 - crawler - INFO - 成功获取笔记：168女大～御姐穿搭🐰🐰🐰... | 点赞：887
+2026-04-05 21:18:45,470 - crawler - INFO - 爬取笔记 23/30: 69cfbfa9000000001f002277
+2026-04-05 21:18:58,051 - crawler - INFO - 成功获取笔记：黑粉极光黑丝 | 这腿谁看了不迷糊... | 点赞：170
+2026-04-05 21:19:00,069 - crawler - INFO - 爬取笔记 24/30: 69cbb8b40000000022026141
+2026-04-05 21:19:15,695 - crawler - INFO - 成功获取笔记：无标题... | 点赞：531
+2026-04-05 21:19:17,712 - crawler - INFO - 爬取笔记 25/30: 69ca635c000000001a02ab6e
+2026-04-05 21:19:30,308 - crawler - INFO - 成功获取笔记：谁懂姐感制服拍照的含金量... | 点赞：400
+2026-04-05 21:19:32,326 - crawler - INFO - 爬取笔记 26/30: 69ca449f0000000021013983
+2026-04-05 21:19:47,844 - crawler - INFO - 成功获取笔记：无标题... | 点赞：259
+2026-04-05 21:19:49,859 - crawler - INFO - 爬取笔记 27/30: 69d0cc9c000000002202a2fe
+2026-04-05 21:20:02,422 - crawler - INFO - 成功获取笔记：虞书欣首个签售会造型，黑丝也被穿出清冷感... | 点赞：425
+2026-04-05 21:20:04,441 - crawler - INFO - 爬取笔记 28/30: 69c957b6000000001b020caf
+2026-04-05 21:20:16,952 - crawler - INFO - 成功获取笔记：0D黑丝｜高透到像第二层皮肤... | 点赞：309
+2026-04-05 21:20:18,973 - crawler - INFO - 滚动页面加载更多...
+2026-04-05 21:20:20,990 - crawler - INFO - 爬取笔记 29/30: 69cb8f9d000000002200f592
+2026-04-05 21:20:33,562 - crawler - INFO - 成功获取笔记：黑丝天花板✨穿了4次都没破！！！... | 点赞：714
+2026-04-05 21:20:35,577 - crawler - INFO - 爬取笔记 30/30: 69cb6aea000000001a02e998
+2026-04-05 21:20:48,131 - crawler - INFO - 成功获取笔记：纯欲辣妹｜左划，看姐穿上身🖤... | 点赞：903
+2026-04-05 21:20:50,142 - crawler - INFO - 已达到目标数量 30，停止爬取
+2026-04-05 21:20:50,143 - crawler - INFO - 爬取完成，共获取 30 篇笔记

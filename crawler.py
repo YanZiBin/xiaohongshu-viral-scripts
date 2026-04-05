@@ -348,7 +348,6 @@ class XiaohongshuCrawler:
                     "封面 URL": note_info.get("cover", ""),
                     "笔记链接": f"{CRAWLER_CONFIG['NOTE_DETAIL_URL']}{note_id}",
                     "正文内容": clean_text(note_info.get("desc", "")),
-                    "发布时间": "",
                     "状态": "成功",
                 }
             
