@@ -413,7 +413,7 @@ class XiaohongshuCrawler:
                 
                 # 开始爬取笔记
                 crawled_ids = set()
-                failed_ids = set()  # 记录失败的 ID
+                failed_counts = {}  # 记录每个 ID 的失败次数
                 consecutive_failures = 0  # 连续失败次数
                 max_consecutive_failures = 10  # 最大连续失败次数
                 scroll_count = 0  # 滚动次数
@@ -443,7 +443,7 @@ class XiaohongshuCrawler:
                             continue
                         
                         # 如果这个 ID 已经失败过 3 次，跳过
-                        if failed_ids.count(card['id']) >= 3:
+                        if failed_counts.get(card['id'], 0) >= 3:
                             logger.info(f"ID {card['id']} 已失败 3 次，跳过")
                             crawled_ids.add(card['id'])
                             continue
@@ -463,7 +463,7 @@ class XiaohongshuCrawler:
                                 card_element.click()
                             else:
                                 logger.warning(f"找不到笔记元素：{card['id']}")
-                                failed_ids.add(card['id'])
+                                failed_counts[card['id']] = failed_counts.get(card['id'], 0) + 1
                                 consecutive_failures += 1
                                 crawled_ids.add(card['id'])
                                 continue
@@ -481,7 +481,7 @@ class XiaohongshuCrawler:
                                 logger.info(f"成功获取笔记：{detail['标题'][:20] if detail['标题'] else '无标题'}... | 点赞：{detail['点赞数']}")
                             else:
                                 logger.warning(f"无法获取笔记详情：{card['id']}")
-                                failed_ids.add(card['id'])
+                                failed_counts[card['id']] = failed_counts.get(card['id'], 0) + 1
                                 consecutive_failures += 1
                                 crawled_ids.add(card['id'])
                             
@@ -490,7 +490,7 @@ class XiaohongshuCrawler:
                             page.wait_for_timeout(2000)
                             
                         except Exception as e:
-                            failed_ids.add(card['id'])
+                            failed_counts[card['id']] = failed_counts.get(card['id'], 0) + 1
                             consecutive_failures += 1
                             crawled_ids.add(card['id'])
                             logger.error(f"爬取笔记 {card['id']} 失败：{e}")

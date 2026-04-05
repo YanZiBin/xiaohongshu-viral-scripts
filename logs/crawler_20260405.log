@@ -1431,3 +1431,25 @@ playwright._impl._errors.TargetClosedError: Page.wait_for_timeout: Target page, 
 2026-04-05 13:10:19,246 - crawler - INFO - 滚动页面加载更多...
 2026-04-05 13:10:21,259 - crawler - INFO - 滚动页面加载更多...
 2026-04-05 13:10:23,285 - crawler - INFO - 滚动页面加载更多...
+2026-04-05 13:14:12,556 - crawler - INFO - 开始爬取，关键词：黑丝, 数量：30
+2026-04-05 13:14:13,471 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝&source=web_explore_feed
+2026-04-05 13:14:19,687 - crawler - INFO - 提取初始笔记列表...
+2026-04-05 13:14:19,698 - crawler - INFO - 初始页面找到 28 篇笔记
+2026-04-05 13:14:19,999 - crawler - ERROR - 爬取失败：'set' object has no attribute 'count'
+2026-04-05 13:14:20,000 - crawler - ERROR - Traceback (most recent call last):
+  File "E:\Yan.doument2\programming exercises\python\小红书爆款脚本\crawler.py", line 446, in crawl
+    if failed_ids.count(card['id']) >= 3:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'set' object has no attribute 'count'
+
+2026-04-05 13:14:35,573 - crawler - INFO - 开始爬取，关键词：黑丝, 数量：30
+2026-04-05 13:14:36,456 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝&source=web_explore_feed
+2026-04-05 13:14:42,648 - crawler - INFO - 提取初始笔记列表...
+2026-04-05 13:14:42,664 - crawler - INFO - 初始页面找到 28 篇笔记
+2026-04-05 13:14:43,013 - crawler - ERROR - 爬取失败：'set' object has no attribute 'count'
+2026-04-05 13:14:43,014 - crawler - ERROR - Traceback (most recent call last):
+  File "E:\Yan.doument2\programming exercises\python\小红书爆款脚本\crawler.py", line 446, in crawl
+    if failed_ids.count(card['id']) >= 3:
+       ^^^^^^^^^^^^^^^^
+AttributeError: 'set' object has no attribute 'count'
+
