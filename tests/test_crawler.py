@@ -9,6 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import parse_cookie, format_number, clean_text
+from crawler import XiaohongshuCrawler
 
 
 class TestParseCookie(unittest.TestCase):
@@ -57,6 +58,91 @@ class TestCleanText(unittest.TestCase):
 
     def test_empty(self):
         self.assertEqual(clean_text(""), "")
+
+
+class TestSearchResultCardExtraction(unittest.TestCase):
+
+    def test_extract_note_cards_from_html_supports_current_search_result_urls(self):
+        html = """
+        <section class="note-item">
+            <a href="/explore/67174698000000001402e218" style="display: none;"></a>
+            <a class="cover mask ld" href="/search_result/67174698000000001402e218?xsec_token=abc&amp;xsec_source="></a>
+        </section>
+        <section class="note-item">
+            <a href="/explore/69cf3020000000001f007426" style="display: none;"></a>
+            <a class="cover mask ld" href="/search_result/69cf3020000000001f007426?xsec_token=def&amp;xsec_source="></a>
+        </section>
+        """
+
+        crawler = XiaohongshuCrawler({})
+        cards = crawler._extract_note_cards_from_html(html)
+
+        self.assertEqual(
+            cards,
+            [
+                {
+                    "id": "67174698000000001402e218",
+                    "href": "/search_result/67174698000000001402e218?xsec_token=abc&amp;xsec_source=",
+                },
+                {
+                    "id": "69cf3020000000001f007426",
+                    "href": "/search_result/69cf3020000000001f007426?xsec_token=def&amp;xsec_source=",
+                },
+            ],
+        )
+
+
+class TestNoteStateParsing(unittest.TestCase):
+
+    def test_parse_note_info_from_state_reads_note_detail_map(self):
+        note_state = {
+            "currentNoteId": "abc123",
+            "noteDetailMap": {
+                "abc123": {
+                    "note": {
+                        "title": "claude code 3小时速通避坑demo",
+                        "desc": "把协议设计流程图丢给claude",
+                        "interactInfo": {
+                            "likedCount": "666",
+                            "collectedCount": "85",
+                            "commentCount": "99",
+                        },
+                        "imageList": [{"urlDefault": "https://example.com/cover.jpg"}],
+                        "time": 1743811200000,
+                    },
+                    "user": {
+                        "nickname": "王子烧大王",
+                    },
+                }
+            },
+        }
+
+        crawler = XiaohongshuCrawler({})
+        note_info = crawler._parse_note_info_from_state(note_state, "abc123")
+
+        self.assertEqual(note_info["author"], "王子烧大王")
+        self.assertEqual(note_info["title"], "claude code 3小时速通避坑demo")
+        self.assertEqual(note_info["desc"], "把协议设计流程图丢给claude")
+        self.assertEqual(note_info["cover"], "https://example.com/cover.jpg")
+
+    def test_parse_note_info_from_state_ignores_empty_note_module(self):
+        note_state = {
+            "prevRouteData": {},
+            "currentNoteId": None,
+            "noteDetailMap": {
+                "undefined": {
+                    "comments": {
+                        "list": [],
+                    },
+                    "note": {},
+                }
+            },
+        }
+
+        crawler = XiaohongshuCrawler({})
+        note_info = crawler._parse_note_info_from_state(note_state, "missing")
+
+        self.assertIsNone(note_info)
 
 
 if __name__ == "__main__":

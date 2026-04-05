@@ -1,0 +1,109 @@
+2026-04-05 11:58:23,872 - crawler - INFO - 开始爬取，关键词：黑丝美女, 数量：30
+2026-04-05 11:58:25,301 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝美女&source=web_explore_feed
+2026-04-05 11:58:31,854 - crawler - INFO - 已保存初始截图
+2026-04-05 11:58:31,855 - crawler - INFO - 提取初始笔记列表...
+2026-04-05 11:58:31,862 - crawler - INFO - 初始页面找到 28 篇笔记
+2026-04-05 11:58:31,863 - crawler - INFO - 爬取笔记 1/30: 69b23ef9000000002603f71d
+2026-04-05 11:58:39,733 - crawler - WARNING - 无法获取笔记详情：69b23ef9000000002603f71d
+2026-04-05 11:58:41,757 - crawler - INFO - 爬取笔记 2/30: 69380d08000000001e0391f3
+2026-04-05 11:58:49,433 - crawler - WARNING - 无法获取笔记详情：69380d08000000001e0391f3
+2026-04-05 11:58:51,447 - crawler - INFO - 爬取笔记 3/30: 6918a9b80000000004007d5b
+2026-04-05 11:58:59,326 - crawler - ERROR - 获取笔记详情失败：Page.evaluate: Cannot serialize result: object reference chain is too long.
+2026-04-05 11:58:59,327 - crawler - WARNING - 无法获取笔记详情：6918a9b80000000004007d5b
+2026-04-05 11:59:01,338 - crawler - INFO - 爬取笔记 4/30: 681d46fa000000002202566f
+2026-04-05 11:59:09,183 - crawler - ERROR - 获取笔记详情失败：Page.evaluate: Cannot serialize result: object reference chain is too long.
+2026-04-05 11:59:09,183 - crawler - WARNING - 无法获取笔记详情：681d46fa000000002202566f
+2026-04-05 11:59:11,204 - crawler - INFO - 爬取笔记 5/30: 690b15ec00000000040069fc
+2026-04-05 11:59:19,217 - crawler - ERROR - 获取笔记详情失败：Page.evaluate: Cannot serialize result: object reference chain is too long.
+2026-04-05 11:59:19,217 - crawler - WARNING - 无法获取笔记详情：690b15ec00000000040069fc
+2026-04-05 11:59:21,227 - crawler - INFO - 爬取笔记 6/30: 69b283de0000000028008e06
+2026-04-05 11:59:29,104 - crawler - ERROR - 获取笔记详情失败：Page.evaluate: Cannot serialize result: object reference chain is too long.
+2026-04-05 11:59:29,104 - crawler - WARNING - 无法获取笔记详情：69b283de0000000028008e06
+2026-04-05 11:59:31,132 - crawler - INFO - 爬取笔记 7/30: 69c2c033000000001a0221d1
+2026-04-05 11:59:39,031 - crawler - ERROR - 获取笔记详情失败：Page.evaluate: Cannot serialize result: object reference chain is too long.
+2026-04-05 11:59:39,031 - crawler - WARNING - 无法获取笔记详情：69c2c033000000001a0221d1
+2026-04-05 11:59:41,046 - crawler - INFO - 爬取笔记 8/30: 69bbcc96000000002200cb35
+2026-04-05 12:01:20,494 - crawler - INFO - 开始爬取，关键词：黑丝, 数量：30
+2026-04-05 12:01:21,410 - crawler - INFO - 访问搜索页面：https://www.xiaohongshu.com/search_result?keyword=黑丝&source=web_explore_feed
+2026-04-05 12:01:28,174 - crawler - INFO - 已保存初始截图
+2026-04-05 12:01:28,175 - crawler - INFO - 提取初始笔记列表...
+2026-04-05 12:01:28,183 - crawler - INFO - 初始页面找到 28 篇笔记
+2026-04-05 12:01:28,184 - crawler - INFO - 爬取笔记 1/30: 69b23ef9000000002603f71d
+2026-04-05 12:01:36,379 - crawler - WARNING - 无法获取笔记详情：69b23ef9000000002603f71d
+2026-04-05 12:01:38,420 - crawler - INFO - 爬取笔记 2/30: 69a514a8000000002202da25
+2026-04-05 12:01:46,373 - crawler - ERROR - 获取笔记详情失败：Page.evaluate: Cannot serialize result: object reference chain is too long.
+2026-04-05 12:01:46,373 - crawler - WARNING - 无法获取笔记详情：69a514a8000000002202da25
+2026-04-05 12:01:48,401 - crawler - INFO - 爬取笔记 3/30: 69380d08000000001e0391f3
+2026-04-05 12:01:49,456 - crawler - WARNING - 找不到笔记元素：69380d08000000001e0391f3
+2026-04-05 12:01:49,456 - crawler - INFO - 爬取笔记 3/30: 6971ef60000000001a037e90
+2026-04-05 12:01:50,501 - crawler - WARNING - 找不到笔记元素：6971ef60000000001a037e90
+2026-04-05 12:01:50,501 - crawler - INFO - 爬取笔记 3/30: 6905b112000000000401087e
+2026-04-05 12:01:51,544 - crawler - WARNING - 找不到笔记元素：6905b112000000000401087e
+2026-04-05 12:01:51,544 - crawler - INFO - 爬取笔记 3/30: 699bb01200000000150221c6
+2026-04-05 12:01:52,582 - crawler - WARNING - 找不到笔记元素：699bb01200000000150221c6
+2026-04-05 12:01:52,582 - crawler - INFO - 爬取笔记 3/30: 69a2a520000000001d01051c
+2026-04-05 12:01:53,614 - crawler - WARNING - 找不到笔记元素：69a2a520000000001d01051c
+2026-04-05 12:01:53,614 - crawler - INFO - 爬取笔记 3/30: 671c65da0000000021006aef
+2026-04-05 12:01:54,652 - crawler - WARNING - 找不到笔记元素：671c65da0000000021006aef
+2026-04-05 12:01:54,652 - crawler - INFO - 爬取笔记 3/30: 69ad2dde000000000d00ba2e
+2026-04-05 12:01:55,296 - crawler - ERROR - 爬取笔记 69ad2dde000000000d00ba2e 失败：Page.wait_for_timeout: Target page, context or browser has been closed
+2026-04-05 12:01:55,298 - crawler - INFO - 爬取笔记 3/30: 693154d9000000001b026967
+2026-04-05 12:01:55,300 - crawler - ERROR - 爬取笔记 693154d9000000001b026967 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,301 - crawler - INFO - 爬取笔记 3/30: 695d5962000000001a02b7ed
+2026-04-05 12:01:55,302 - crawler - ERROR - 爬取笔记 695d5962000000001a02b7ed 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,304 - crawler - INFO - 爬取笔记 3/30: 69d1588a00000000230043e0
+2026-04-05 12:01:55,305 - crawler - ERROR - 爬取笔记 69d1588a00000000230043e0 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,307 - crawler - INFO - 爬取笔记 3/30: 69c2c033000000001a0221d1
+2026-04-05 12:01:55,309 - crawler - ERROR - 爬取笔记 69c2c033000000001a0221d1 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,311 - crawler - INFO - 爬取笔记 3/30: 6918a9b80000000004007d5b
+2026-04-05 12:01:55,313 - crawler - ERROR - 爬取笔记 6918a9b80000000004007d5b 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,315 - crawler - INFO - 爬取笔记 3/30: 692e65bd000000001e038de9
+2026-04-05 12:01:55,317 - crawler - ERROR - 爬取笔记 692e65bd000000001e038de9 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,318 - crawler - INFO - 爬取笔记 3/30: 6913fa7600000000050138f1
+2026-04-05 12:01:55,320 - crawler - ERROR - 爬取笔记 6913fa7600000000050138f1 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,321 - crawler - INFO - 爬取笔记 3/30: 693fae18000000001f00896f
+2026-04-05 12:01:55,324 - crawler - ERROR - 爬取笔记 693fae18000000001f00896f 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,325 - crawler - INFO - 爬取笔记 3/30: 69c00ae3000000001a020023
+2026-04-05 12:01:55,328 - crawler - ERROR - 爬取笔记 69c00ae3000000001a020023 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,330 - crawler - INFO - 爬取笔记 3/30: 6872392d000000002201e0ea
+2026-04-05 12:01:55,333 - crawler - ERROR - 爬取笔记 6872392d000000002201e0ea 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,335 - crawler - INFO - 爬取笔记 3/30: 691bd6ed000000000700fa40
+2026-04-05 12:01:55,338 - crawler - ERROR - 爬取笔记 691bd6ed000000000700fa40 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,340 - crawler - INFO - 爬取笔记 3/30: 69becca6000000001a027b54
+2026-04-05 12:01:55,341 - crawler - ERROR - 爬取笔记 69becca6000000001a027b54 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,343 - crawler - INFO - 爬取笔记 3/30: 69bd6f54000000001a028fd8
+2026-04-05 12:01:55,345 - crawler - ERROR - 爬取笔记 69bd6f54000000001a028fd8 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,346 - crawler - INFO - 爬取笔记 3/30: 6893230900000000250238f3
+2026-04-05 12:01:55,348 - crawler - ERROR - 爬取笔记 6893230900000000250238f3 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,350 - crawler - INFO - 爬取笔记 3/30: 68d90914000000001301ed65
+2026-04-05 12:01:55,352 - crawler - ERROR - 爬取笔记 68d90914000000001301ed65 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,354 - crawler - INFO - 爬取笔记 3/30: 69c1271c0000000021011e67
+2026-04-05 12:01:55,355 - crawler - ERROR - 爬取笔记 69c1271c0000000021011e67 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,357 - crawler - INFO - 爬取笔记 3/30: 69d078d7000000001a0329fa
+2026-04-05 12:01:55,359 - crawler - ERROR - 爬取笔记 69d078d7000000001a0329fa 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,360 - crawler - INFO - 爬取笔记 3/30: 69355f46000000001b023d75
+2026-04-05 12:01:55,363 - crawler - ERROR - 爬取笔记 69355f46000000001b023d75 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,364 - crawler - INFO - 爬取笔记 3/30: 69b605f6000000001d018709
+2026-04-05 12:01:55,366 - crawler - ERROR - 爬取笔记 69b605f6000000001d018709 失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,367 - crawler - INFO - 滚动页面加载更多...
+2026-04-05 12:01:55,676 - crawler - ERROR - 爬取失败：Page.evaluate: Target page, context or browser has been closed
+2026-04-05 12:01:55,680 - crawler - ERROR - Traceback (most recent call last):
+  File "E:\Yan.doument2\programming exercises\python\小红书爆款脚本\crawler.py", line 460, in crawl
+    page.evaluate("window.scrollBy(0, 800)")
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\sync_api\_generated.py", line 8566, in evaluate
+    self._sync(
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_page.py", line 464, in evaluate
+    return await self._main_frame.evaluate(expression, arg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_frame.py", line 320, in evaluate
+    await self._channel.send(
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Yan.All\Anaconda\Lib\site-packages\playwright\_impl\_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Page.evaluate: Target page, context or browser has been closed
+

@@ -12,6 +12,11 @@ logger = setup_logger("crawler")
 
 
 class XiaohongshuCrawler:
+    NOTE_URL_PATTERNS = (
+        "/search_result/",
+        "/explore/",
+        "/discovery/item/",
+    )
     """小红书爬虫类"""
 
     def __init__(self, cookie: dict):
@@ -73,22 +78,61 @@ class XiaohongshuCrawler:
         return page.evaluate("""
             () => {
                 const cards = [];
-                const links = document.querySelectorAll('a[href*="/discovery/item/"]');
                 const seenIds = new Set();
                 
-                links.forEach(link => {
-                    const href = link.href;
-                    const idMatch = href.match(/\\/discovery\\/item\\/([a-zA-Z0-9]+)/);
-                    if (idMatch && !seenIds.has(idMatch[1])) {
-                        seenIds.add(idMatch[1]);
-                        const rect = link.getBoundingClientRect();
-                        cards.push({
-                            id: idMatch[1],
-                            href: href,
-                            top: rect.top,
-                            left: rect.left
-                        });
+                // 使用多种选择器匹配笔记卡片
+                const selectors = [
+                    'section.note-item',
+                    'div[role="listitem"]',
+                    'div.note-item',
+                    'article[role="article"]',
+                    'div[class*="note-item"]',
+                    'div[class*="NoteItem"]',
+                    'a[href*="/explore/"]',
+                    'a[href*="/search_result/"]',
+                    'a[href*="/discovery/item/"]'
+                ];
+                
+                const elements = [];
+                for (const selector of selectors) {
+                    try {
+                        const els = document.querySelectorAll(selector);
+                        els.forEach(el => elements.push(el));
+                    } catch (e) {}
+                }
+                
+                elements.forEach(element => {
+                    // 如果是 a 标签，直接使用
+                    let linkElement = element.tagName === 'A' ? element : null;
+                    
+                    // 如果不是 a 标签，查找内部的 a 标签
+                    if (!linkElement) {
+                        linkElement = element.querySelector('a[href*="/explore/"], a[href*="/search_result/"], a[href*="/discovery/item/"]');
                     }
+                    
+                    if (!linkElement) return;
+                    
+                    const href = linkElement.getAttribute('href') || linkElement.href || '';
+                    const idMatch = href.match(/\\/(?:search_result|explore|discovery\\/item)\\/([a-zA-Z0-9]+)/);
+                    if (!idMatch) return;
+                    
+                    const noteId = idMatch[1];
+                    if (seenIds.has(noteId)) return;
+                    seenIds.add(noteId);
+                    
+                    // 检查元素是否可见
+                    const style = window.getComputedStyle(element);
+                    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return;
+                    
+                    const rect = element.getBoundingClientRect();
+                    if (rect.width === 0 || rect.height === 0) return;
+                    
+                    cards.push({
+                        id: noteId,
+                        href: href,
+                        top: rect.top,
+                        left: rect.left
+                    });
                 });
                 
                 // 按位置排序（从上到下，从左到右）
@@ -104,11 +148,106 @@ class XiaohongshuCrawler:
             }
         """)
 
+    def _extract_note_cards_from_html(self, html: str) -> list:
+        """浠?HTML 蹇収涓彁鍙栫瑪璁?ID 鍜岄摼鎺ワ紝鐢ㄤ簬 DOM 鎻愬彇澶辫触鏃剁殑鍏滃簳"""
+        cards_by_id = {}
+        for href in re.findall(r'href="([^"]+)"', html):
+            id_match = re.search(r'/(?:search_result|explore|discovery/item)/([a-zA-Z0-9]+)', href)
+            if not id_match:
+                continue
+
+            note_id = id_match.group(1)
+            current = cards_by_id.get(note_id)
+            if current is None:
+                cards_by_id[note_id] = {"id": note_id, "href": href}
+                continue
+
+            if "/search_result/" in href and "/search_result/" not in current["href"]:
+                current["href"] = href
+
+        return list(cards_by_id.values())
+
+    def _find_card_element(self, page: Page, note_id: str):
+        """鏍规嵁褰撳墠椤甸潰缁撴瀯瀵绘壘鍙偣鍑荤殑绗旇鍗＄墖鍏冪礌"""
+        selectors = [
+            f'a[href*="/search_result/{note_id}"]',
+            f'a[href*="/explore/{note_id}"]',
+            f'a[href*="/discovery/item/{note_id}"]',
+        ]
+        for selector in selectors:
+            element = page.locator(selector).first
+            if element.count() > 0:
+                return element
+        return None
+
+    def _parse_note_info_from_state(self, note_state: dict, note_id: str) -> Optional[dict]:
+        """Parse detail from the note store instead of treating the whole module as a note."""
+        if not note_state:
+            return None
+
+        detail_map = note_state.get("noteDetailMap") or {}
+        candidate_ids = [note_id, note_state.get("currentNoteId"), *detail_map.keys()]
+        visited = set()
+
+        for candidate_id in candidate_ids:
+            if not candidate_id or candidate_id in visited:
+                continue
+            visited.add(candidate_id)
+
+            detail_entry = detail_map.get(candidate_id)
+            if not detail_entry:
+                continue
+
+            note = detail_entry.get("note") or detail_entry
+            user = detail_entry.get("user") or note.get("user") or {}
+            interact_info = note.get("interactInfo") or note.get("interact_info") or {}
+            image_list = note.get("imageList") or note.get("image_list") or []
+            video = note.get("video") or {}
+
+            title = note.get("title") or ""
+            desc = note.get("desc") or ""
+            author = user.get("nickname") or user.get("nickName") or ""
+            like_count = interact_info.get("likedCount") or interact_info.get("liked_count") or 0
+            collect_count = interact_info.get("collectedCount") or interact_info.get("collected_count") or 0
+            comment_count = interact_info.get("commentCount") or interact_info.get("comment_count") or 0
+
+            cover = ""
+            if image_list:
+                first_image = image_list[0] or {}
+                cover = (
+                    first_image.get("urlDefault")
+                    or first_image.get("url_default")
+                    or first_image.get("url")
+                    or ""
+                )
+            elif video.get("coverUrl") or video.get("cover_url"):
+                cover = video.get("coverUrl") or video.get("cover_url") or ""
+
+            if not any([title, desc, author, cover, like_count, collect_count, comment_count]):
+                continue
+
+            note_time = note.get("time") or detail_entry.get("currentTime") or ""
+            if isinstance(note_time, (int, float)) and note_time > 0:
+                note_time = time.strftime("%Y-%m-%d", time.localtime(note_time / 1000))
+
+            return {
+                "author": author,
+                "title": title,
+                "desc": desc,
+                "likeCount": like_count,
+                "collectCount": collect_count,
+                "commentCount": comment_count,
+                "cover": cover,
+                "time": note_time,
+            }
+
+        return None
+
     def _scroll_to_element(self, page: Page, card: dict):
         """滚动到指定元素"""
         page.evaluate(f"""
             () => {{
-                window.scrollTo(0, {max(0, int(card['top'] - 100))});
+                window.scrollTo(0, {max(0, int(card.get('top', 0) - 100))});
             }}
         """)
         page.wait_for_timeout(500)
@@ -118,55 +257,112 @@ class XiaohongshuCrawler:
         try:
             # 等待页面加载
             page.wait_for_timeout(3000)
-            
-            # 尝试从 __INITIAL_STATE__ 获取数据
-            note_info = page.evaluate("""
+
+            # 方法 1: 尝试从 __INITIAL_STATE__ 获取数据
+            note_state = page.evaluate("""
                 () => {
                     const state = window.__INITIAL_STATE__;
-                    if (!state) return null;
-                    
-                    // 尝试多个可能的路径
-                    let noteData = state.note || state.noteDetail || state.noteDetailTab;
-                    if (!noteData) return null;
-                    
-                    // 获取笔记信息
-                    const note = noteData.note || noteData;
-                    const user = noteData.user || note.user || {};
-                    const interactInfo = note.interactInfo || note.interact_info || {};
-                    const imageList = note.imageList || note.image_list || [];
-                    const video = note.video || {};
-                    
-                    // 获取标题和内容
-                    let title = note.title || '';
-                    let desc = note.desc || '';
-                    
-                    // 获取封面
-                    let cover = '';
-                    if (imageList.length > 0) {
-                        cover = imageList[0].urlDefault || imageList[0].url_default || imageList[0].url || '';
-                    } else if (video.coverUrl || video.cover_url) {
-                        cover = video.coverUrl || video.cover_url;
-                    }
-                    
-                    // 获取时间
-                    let time = note.time || '';
-                    if (typeof time === 'number' && time > 0) {
-                        time = new Date(time).toLocaleDateString('zh-CN');
-                    }
-                    
-                    return {
-                        author: user.nickname || user.nickName || '',
-                        title: title,
-                        desc: desc,
-                        likeCount: interactInfo.likedCount || interactInfo.liked_count || 0,
-                        collectCount: interactInfo.collectedCount || interactInfo.collected_count || 0,
-                        commentCount: interactInfo.commentCount || interactInfo.comment_count || 0,
-                        cover: cover,
-                        time: time
-                    };
+                    return state?.note || null;
                 }
             """)
+            note_info = self._parse_note_info_from_state(note_state, note_id)
             
+            # 方法 2: 尝试从 DOM 元素直接提取（根据 F12 看到的结构）
+            if not note_info:
+                dom_info = page.evaluate("""
+                    () => {
+                        // 从 DOM 元素提取
+                        const titleEl = document.querySelector('#detail-title, .title, [class*="title"]');
+                        const descEl = document.querySelector('#detail-desc, .desc, [class*="desc"]');
+                        const authorEl = document.querySelector('.user-name, [class*="user-name"], [class*="username"]');
+                        
+                        // 获取点赞、收藏、评论数
+                        const likeEl = document.querySelector('.like-count, [class*="like"] .count, span.count');
+                        const collectEl = document.querySelector('.collect-count, [class*="collect"] .count, span.count');
+                        const commentEl = document.querySelector('.comment-count, [class*="comment"] .count, span.count');
+                        
+                        // 获取封面图片
+                        const imgEl = document.querySelector('article img, .cover img, img[src*="http"]');
+                        
+                        const getText = (el) => el ? el.textContent?.trim() || '' : '';
+                        const getNumber = (el) => {
+                            const text = getText(el);
+                            const num = text.match(/[\\d,]+/);
+                            return num ? parseInt(num[0].replace(/,/g, '')) : 0;
+                        };
+                        
+                        const title = getText(titleEl);
+                        const desc = getText(descEl);
+                        const author = getText(authorEl);
+                        const likeCount = getNumber(likeEl);
+                        const collectCount = getNumber(collectEl);
+                        const commentCount = getNumber(commentEl);
+                        const cover = imgEl?.src || imgEl?.getAttribute('src') || '';
+                        
+                        if (!title && !desc && !author) return null;
+                        
+                        return {
+                            author,
+                            title,
+                            desc,
+                            likeCount,
+                            collectCount,
+                            commentCount,
+                            cover
+                        };
+                    }
+                """)
+                
+                if dom_info and any(dom_info.get(field) for field in ("author", "title", "desc")):
+                    note_info = dom_info
+            
+            # 方法 3: 尝试 legacy 方式
+            if not note_info:
+                legacy_note_info = page.evaluate("""
+                    () => {
+                        const state = window.__INITIAL_STATE__;
+                        if (!state) return null;
+                        
+                        let noteData = state.note || state.noteDetail || state.noteDetailTab;
+                        if (!noteData) return null;
+                        
+                        const note = noteData.note || noteData;
+                        const user = noteData.user || note.user || {};
+                        const interactInfo = note.interactInfo || note.interact_info || {};
+                        const imageList = note.imageList || note.image_list || [];
+                        const video = note.video || {};
+                        
+                        let title = note.title || '';
+                        let desc = note.desc || '';
+                        
+                        let cover = '';
+                        if (imageList.length > 0) {
+                            cover = imageList[0].urlDefault || imageList[0].url_default || imageList[0].url || '';
+                        } else if (video.coverUrl || video.cover_url) {
+                            cover = video.coverUrl || video.cover_url;
+                        }
+                        
+                        let time = note.time || '';
+                        if (typeof time === 'number' && time > 0) {
+                            time = new Date(time).toLocaleDateString('zh-CN');
+                        }
+                        
+                        return {
+                            author: user.nickname || user.nickName || '',
+                            title: title,
+                            desc: desc,
+                            likeCount: interactInfo.likedCount || interactInfo.liked_count || 0,
+                            collectCount: interactInfo.collectedCount || interactInfo.collected_count || 0,
+                            commentCount: interactInfo.commentCount || interactInfo.comment_count || 0,
+                            cover: cover,
+                            time: time
+                        };
+                    }
+                """)
+                
+                if legacy_note_info and any(legacy_note_info.get(field) for field in ("author", "title", "desc", "cover")):
+                    note_info = legacy_note_info
+
             if note_info:
                 return {
                     "序号": 0,
@@ -220,6 +416,8 @@ class XiaohongshuCrawler:
                 # 先提取一次笔记（不筛选）
                 logger.info("提取初始笔记列表...")
                 cards = self._extract_note_cards(page)
+                if not cards:
+                    cards = self._extract_note_cards_from_html(page.content())
                 logger.info(f"初始页面找到 {len(cards)} 篇笔记")
                 
                 # 如果没有笔记，尝试点击筛选
@@ -231,6 +429,8 @@ class XiaohongshuCrawler:
                     
                     # 再次提取
                     cards = self._extract_note_cards(page)
+                    if not cards:
+                        cards = self._extract_note_cards_from_html(page.content())
                     logger.info(f"筛选后找到 {len(cards)} 篇笔记")
                 
                 # 如果还是没有，尝试直接滚动
@@ -241,6 +441,8 @@ class XiaohongshuCrawler:
                         page.wait_for_timeout(2000)
                         page.screenshot(path=f"debug_03_scroll_{i}.png")
                         cards = self._extract_note_cards(page)
+                        if not cards:
+                            cards = self._extract_note_cards_from_html(page.content())
                         if cards:
                             logger.info(f"滚动后找到 {len(cards)} 篇笔记")
                             break
@@ -269,11 +471,14 @@ class XiaohongshuCrawler:
                             page.wait_for_timeout(500)
                             
                             # 点击笔记
-                            card_element = page.locator(f'a[href*="/discovery/item/{card["id"]}"]').first
-                            if card_element.is_visible():
+                            card_element = self._find_card_element(page, card["id"])
+                            if card_element:
+                                card_element.scroll_into_view_if_needed()
+                                page.wait_for_timeout(300)
                                 card_element.click()
                             else:
                                 logger.warning(f"找不到笔记元素：{card['id']}")
+                                crawled_ids.add(card['id'])
                                 continue
                             
                             page.wait_for_timeout(3000)
@@ -309,6 +514,7 @@ class XiaohongshuCrawler:
                             page.wait_for_timeout(2000)
                             
                         except Exception as e:
+                            crawled_ids.add(card['id'])
                             logger.error(f"爬取笔记 {card['id']} 失败：{e}")
                             try:
                                 page.go_back()
@@ -321,6 +527,8 @@ class XiaohongshuCrawler:
                     page.evaluate("window.scrollBy(0, 800)")
                     page.wait_for_timeout(3000)
                     cards = self._extract_note_cards(page)
+                    if not cards:
+                        cards = self._extract_note_cards_from_html(page.content())
                 
                 browser.close()
                 return notes

@@ -4,7 +4,7 @@
 CRAWLER_CONFIG = {
     "BASE_URL": "https://www.xiaohongshu.com",
     "SEARCH_URL": "https://www.xiaohongshu.com/search_result",
-    "NOTE_DETAIL_URL": "https://www.xiaohongshu.com/discovery/item/",
+    "NOTE_DETAIL_URL": "https://www.xiaohongshu.com/explore/",
     "LIMIT": 30,  # 默认爬取数量
     "MAX_RETRIES": 3,  # 最大重试次数
     "RETRY_DELAY": 1,  # 重试间隔（秒）
