@@ -413,10 +413,6 @@ class XiaohongshuCrawler:
                 page.goto(url, timeout=60000)
                 page.wait_for_timeout(5000)
                 
-                # 保存初始截图
-                page.screenshot(path="debug_01_initial.png")
-                logger.info("已保存初始截图")
-                
                 # 先提取一次笔记（不筛选）
                 logger.info("提取初始笔记列表...")
                 cards = self._extract_note_cards(page)
@@ -429,7 +425,6 @@ class XiaohongshuCrawler:
                     logger.info("尝试点击筛选...")
                     self._click_filter(page)
                     page.wait_for_timeout(3000)
-                    page.screenshot(path="debug_02_filtered.png")
                     
                     # 再次提取
                     cards = self._extract_note_cards(page)
@@ -443,7 +438,6 @@ class XiaohongshuCrawler:
                     for i in range(3):
                         page.evaluate("window.scrollBy(0, 500)")
                         page.wait_for_timeout(2000)
-                        page.screenshot(path=f"debug_03_scroll_{i}.png")
                         cards = self._extract_note_cards(page)
                         if not cards:
                             cards = self._extract_note_cards_from_html(page.content())
@@ -486,7 +480,6 @@ class XiaohongshuCrawler:
                                 continue
                             
                             page.wait_for_timeout(3000)
-                            page.screenshot(path=f"debug_note_{card['id']}.png")
                             
                             # 获取详情
                             detail = self._get_note_detail_from_page(page, card['id'])
